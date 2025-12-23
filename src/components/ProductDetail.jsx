@@ -1,13 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `https://backend-libros-ox7x.onrender.com${image}`;
-  return image;
-};
+import { getImageUrl, API_ENDPOINTS } from '../config/api';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -22,7 +16,7 @@ export default function ProductDetail() {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch(`https://backend-libros-ox7x.onrender.com/api/productos/${id}`);
+        const response = await fetch(API_ENDPOINTS.PRODUCT_BY_ID(id));
         if (!response.ok) throw new Error('Error al cargar producto');
         const data = await response.json();
         setProduct(data);

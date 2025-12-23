@@ -1,12 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `https://backend-libros-ox7x.onrender.com${image}`;
-  return image;
-};
+import { getImageUrl } from '../config/api';
 
 export default function Cart() {
   const { cart, removeFromCart, updateQuantity, clearCart, getTotal } = useCart();

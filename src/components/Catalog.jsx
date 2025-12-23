@@ -2,15 +2,9 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCategory } from '../contexts/CategoryContext';
 import { useCart } from '../contexts/CartContext';
+import { getImageUrl, API_ENDPOINTS } from '../config/api';
 import Navbar from './Navbar';
 import Footer from './Footer';
-
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `https://backend-libros-ox7x.onrender.com${image}`;
-  return image;
-};
 
 export default function Catalog() {
   const { categoria } = useParams();
@@ -34,9 +28,7 @@ export default function Catalog() {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch(
-          `https://backend-libros-ox7x.onrender.com/api/productos?categoria=${selectedCategory}`
-        );
+        const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory));
         if (!response.ok) throw new Error('Error al cargar productos');
         const data = await response.json();
         setProducts(Array.isArray(data) ? data : []);

@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { API_ENDPOINTS } from '../config/api';
 
 const validateEmail = (email) => /\S+@\S+\.\S+/.test(email);
 const validatePhone = (phone) => /^\d{7,15}$/.test(phone);
@@ -73,7 +74,7 @@ export default function Registro() {
       setLoading(true);
       setMessage('');
       try {
-        const response = await fetch('https://backend-libros-ox7x.onrender.com/api/usuarios/register', {
+        const response = await fetch(API_ENDPOINTS.REGISTER, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)

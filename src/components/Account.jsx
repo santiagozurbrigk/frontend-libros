@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
+import { getImageUrl, API_ENDPOINTS } from '../config/api';
 
 const getStatusClass = (status) => {
   switch (status) {
@@ -16,12 +17,6 @@ const getStatusClass = (status) => {
   }
 };
 
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `https://backend-libros-ox7x.onrender.com${image}`;
-  return image;
-};
 
 export default function Account() {
   const { user } = useAuth();
@@ -35,7 +30,7 @@ export default function Account() {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch('https://backend-libros-ox7x.onrender.com/api/pedidos/mis-pedidos', {
+        const response = await fetch(API_ENDPOINTS.USER_ORDERS, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('token')}`
           }

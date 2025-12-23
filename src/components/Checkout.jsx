@@ -2,13 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `https://backend-libros-ox7x.onrender.com${image}`;
-  return image;
-};
+import { getImageUrl, API_ENDPOINTS } from '../config/api';
 
 export default function Checkout() {
   const { cart, getTotal, clearCart } = useCart();
@@ -38,7 +32,7 @@ export default function Checkout() {
         paymentMethod: 'efectivo'
       };
 
-      const response = await fetch('https://backend-libros-ox7x.onrender.com/api/pedidos', {
+      const response = await fetch(API_ENDPOINTS.ORDERS, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

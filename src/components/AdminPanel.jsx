@@ -2,15 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
-const API_BASE = 'https://backend-libros-ox7x.onrender.com';
-
-const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `${API_BASE}${image}`;
-  return image;
-};
+import { getImageUrl, API_ENDPOINTS, API_BASE_URL } from '../config/api';
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -101,7 +93,7 @@ export default function AdminPanel() {
     setLoadingStats(true);
     setErrorStats('');
     try {
-      const response = await fetch(`${API_BASE}/api/pedidos/estadisticas`);
+      const response = await fetch(API_ENDPOINTS.ORDER_STATS);
       const data = await response.json();
       setStats(data);
     } catch {
@@ -112,7 +104,7 @@ export default function AdminPanel() {
 
   const loadMonthlySales = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/pedidos/dashboard/ventas-mes`);
+      const response = await fetch(API_ENDPOINTS.MONTHLY_SALES);
       const data = await response.json();
       setMonthlySales(data);
     } catch {}
@@ -120,7 +112,7 @@ export default function AdminPanel() {
 
   const loadTopProducts = async () => {
     try {
-      const response = await fetch(`${API_BASE}/api/pedidos/dashboard/top-productos`);
+      const response = await fetch(API_ENDPOINTS.TOP_PRODUCTS);
       const data = await response.json();
       setTopProducts(data);
     } catch {}
@@ -129,7 +121,7 @@ export default function AdminPanel() {
   const loadProducts = async () => {
     setLoadingProducts(true);
     try {
-      const response = await fetch(`${API_BASE}/api/productos`);
+      const response = await fetch(API_ENDPOINTS.PRODUCTS);
       const data = await response.json();
       setProducts(Array.isArray(data) ? data : []);
     } catch {}
@@ -140,7 +132,7 @@ export default function AdminPanel() {
     setLoadingOrders(true);
     setOrderError('');
     try {
-      const url = `${API_BASE}/api/pedidos?limit=${ordersLimit}${orderSearch ? `&search=${encodeURIComponent(orderSearch)}` : ''}`;
+      const url = `${API_ENDPOINTS.ORDERS}?limit=${ordersLimit}${orderSearch ? `&search=${encodeURIComponent(orderSearch)}` : ''}`;
       const response = await fetch(url);
       const data = await response.json();
       setOrders(Array.isArray(data) ? data : []);
@@ -154,7 +146,7 @@ export default function AdminPanel() {
     setLoadingUsers(true);
     setUserError('');
     try {
-      const response = await fetch(`${API_BASE}/api/usuarios?search=${encodeURIComponent(userSearch)}`);
+      const response = await fetch(`${API_ENDPOINTS.USERS}?search=${encodeURIComponent(userSearch)}`);
       const data = await response.json();
       setUsers(Array.isArray(data) ? data : []);
     } catch {
@@ -192,8 +184,8 @@ export default function AdminPanel() {
 
     try {
       const url = editingProduct
-        ? `${API_BASE}/api/productos/${editingProduct._id}`
-        : `${API_BASE}/api/productos`;
+        ? API_ENDPOINTS.PRODUCT_BY_ID(editingProduct._id)
+        : API_ENDPOINTS.PRODUCTS;
       const method = editingProduct ? 'PUT' : 'POST';
 
       const response = await fetch(url, {
@@ -239,7 +231,7 @@ export default function AdminPanel() {
   const deleteProduct = async (productId) => {
     if (!confirm('¿Estás seguro de eliminar este producto?')) return;
     try {
-      const response = await fetch(`${API_BASE}/api/productos/${productId}`, {
+      const response = await fetch(API_ENDPOINTS.PRODUCT_BY_ID(productId), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -256,7 +248,7 @@ export default function AdminPanel() {
     setSavingStatus(true);
     setStatusError('');
     try {
-      const response = await fetch(`${API_BASE}/api/pedidos/${selectedOrder._id}`, {
+      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(selectedOrder._id), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -282,7 +274,7 @@ export default function AdminPanel() {
     if (!confirm('¿Estás seguro de eliminar este pedido?')) return;
     setDeletingOrder((prev) => ({ ...prev, [orderId]: true }));
     try {
-      const response = await fetch(`${API_BASE}/api/pedidos/${orderId}`, {
+      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(orderId), {
         method: 'DELETE',
         headers: {
           Authorization: `Bearer ${localStorage.getItem('token')}`
@@ -299,7 +291,7 @@ export default function AdminPanel() {
     setSelectedUser(user);
     setLoadingUserOrders(true);
     try {
-      const response = await fetch(`${API_BASE}/api/pedidos?userId=${user._id}`);
+      const response = await fetch(API_ENDPOINTS.USER_ORDERS_BY_USER_ID(user._id));
       const data = await response.json();
       setUserOrders(Array.isArray(data) ? data : []);
     } catch {
