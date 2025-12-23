@@ -759,37 +759,40 @@ export default function AdminPanel() {
                 </button>
               </div>
               {scannerActive && (
-                <div className="mb-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
-                  <div className="flex flex-col sm:flex-row sm:items-center gap-2">
-                    <div className="flex-1">
-                      <label className="block text-sm font-medium text-blue-800 mb-1">
+                <div className="mb-4 p-3 sm:p-4 bg-blue-50 border border-blue-200 rounded-lg w-full max-w-full overflow-hidden">
+                  <div className="flex flex-col gap-3">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                      <label className="block text-sm font-medium text-blue-800 flex-shrink-0">
                         Escanear código de barras:
                       </label>
-                      <input
-                        ref={scannerInputRef}
-                        type="text"
-                        placeholder="Escanee el código de barras del pedido..."
-                        value={scannerInput}
-                        onChange={(e) => setScannerInput(e.target.value)}
-                        onKeyPress={handleScannerKeyPress}
-                        className="w-full border border-blue-300 rounded-lg px-4 py-2 text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                        autoFocus
-                      />
+                      <button
+                        onClick={() => {
+                          setScannerActive(false);
+                          setScannerInput('');
+                          setScannerError('');
+                        }}
+                        className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1.5 rounded-lg transition text-sm font-semibold whitespace-nowrap flex-shrink-0 self-start sm:self-auto"
+                      >
+                        Cerrar
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        setScannerActive(false);
-                        setScannerInput('');
-                        setScannerError('');
-                      }}
-                      className="bg-gray-500 hover:bg-gray-600 text-white px-4 py-2 rounded-lg transition text-lg font-semibold"
-                    >
-                      Cerrar
-                    </button>
+                    <input
+                      ref={scannerInputRef}
+                      type="text"
+                      placeholder="Escanee el código de barras del pedido..."
+                      value={scannerInput}
+                      onChange={(e) => setScannerInput(e.target.value)}
+                      onKeyPress={handleScannerKeyPress}
+                      className="w-full min-w-0 border border-blue-300 rounded-lg px-3 sm:px-4 py-2 text-base sm:text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                      autoFocus
+                    />
                   </div>
                   {scannerError && (
-                    <div className="mt-2 text-red-600 text-sm font-medium">{scannerError}</div>
+                    <div className="mt-2 text-red-600 text-sm font-medium break-words">{scannerError}</div>
                   )}
+                  <div className="mt-2 text-xs text-blue-600 break-words">
+                    💡 <strong>Consejo:</strong> Conecte un lector de códigos de barras USB y escanee el ID del pedido. También puede escribir manualmente los últimos dígitos del ID del pedido.
+                  </div>
                 </div>
               )}
               <div className="mb-4">
