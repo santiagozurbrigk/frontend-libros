@@ -29,7 +29,9 @@ export default function Catalog() {
         const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory));
         if (!response.ok) throw new Error('Error al cargar productos');
         const data = await response.json();
-        setProducts(Array.isArray(data) ? data : []);
+        // El backend devuelve { products, total } o puede ser un array directo
+        const productsArray = Array.isArray(data) ? data : (data.products || []);
+        setProducts(productsArray);
       } catch (err) {
         setError(err.message || 'Error al cargar productos');
       }

@@ -121,9 +121,15 @@ export default function AdminPanel() {
   const loadProducts = async () => {
     setLoadingProducts(true);
     try {
-      const response = await fetch(API_ENDPOINTS.PRODUCTS);
+      const response = await fetch(API_ENDPOINTS.PRODUCTS_ADMIN, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        }
+      });
       const data = await response.json();
-      setProducts(Array.isArray(data) ? data : []);
+      // El backend devuelve { products } o puede ser un array directo
+      const productsArray = Array.isArray(data) ? data : (data.products || []);
+      setProducts(productsArray);
     } catch {}
     setLoadingProducts(false);
   };

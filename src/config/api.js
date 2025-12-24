@@ -16,6 +16,7 @@ export const API_ENDPOINTS = {
   
   // Productos
   PRODUCTS: `${API_BASE_URL}/api/productos`,
+  PRODUCTS_ADMIN: `${API_BASE_URL}/api/productos/admin`, // Todos los productos sin límite para admin
   PRODUCT_BY_ID: (id) => `${API_BASE_URL}/api/productos/${id}`,
   PRODUCTS_BY_CATEGORY: (categoria) => `${API_BASE_URL}/api/productos?categoria=${categoria}`,
   
