@@ -13,7 +13,6 @@ import Account from './components/Account';
 import ProductDetail from './components/ProductDetail';
 import AdminPanel from './components/AdminPanel';
 import Navbar from './components/Navbar';
-import Footer from './components/Footer';
 
 function CategorySelectorWrapper() {
   const navigate = useNavigate();
@@ -123,9 +122,6 @@ function AppRoutes() {
         <Route path="*" element={<Navigate to="/login" />} />
       </Routes>
 
-      {!user?.isAdmin && !['/login', '/registro', '/carrito', '/admin', '/checkout'].includes(location.pathname) && (
-        <Footer />
-      )}
     </div>
   );
 }

@@ -3,8 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useCategory } from '../contexts/CategoryContext';
 import { useCart } from '../contexts/CartContext';
 import { getImageUrl, API_ENDPOINTS } from '../config/api';
-import Navbar from './Navbar';
-import Footer from './Footer';
 
 export default function Catalog() {
   const { categoria } = useParams();
@@ -49,8 +47,6 @@ export default function Catalog() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
-      <Navbar />
-      
       <div className="max-w-7xl mx-auto py-10 px-4">
         <div className="mb-8">
           <button
@@ -152,8 +148,6 @@ export default function Catalog() {
           </div>
         )}
       </div>
-
-      <Footer />
     </div>
   );
 }
