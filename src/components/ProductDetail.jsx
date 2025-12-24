@@ -48,41 +48,72 @@ export default function ProductDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-10 px-4">
-      <div className="max-w-4xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30 py-10 px-4">
+      <div className="max-w-5xl mx-auto">
         <button
           onClick={() => navigate(-1)}
-          className="text-blue-600 hover:underline mb-4"
+          className="text-blue-600 hover:text-blue-700 font-medium mb-6 flex items-center gap-2 transition-colors duration-200 hover:gap-3 group"
         >
-          ← Volver
+          <svg className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Volver
         </button>
 
-        <div className="bg-white rounded-lg shadow-lg p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
-          {product.image && (
-            <img
-              src={getImageUrl(product.image)}
-              alt={product.name}
-              className="w-full h-auto object-contain rounded"
-            />
-          )}
-
-          <div>
-            <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
-            <p className="text-gray-600 mb-4">{product.description}</p>
-            <div className="mb-4">
-              <p className="text-gray-500">Páginas: {product.pages}</p>
-              <p className="text-gray-500 capitalize">Categoría: {product.category}</p>
+        <div className="bg-white rounded-2xl shadow-xl overflow-hidden border-2 border-slate-200">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-8">
+            <div className="bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl p-8 flex items-center justify-center">
+              {product.image && (
+                <img
+                  src={getImageUrl(product.image)}
+                  alt={product.name}
+                  className="w-full max-w-md h-auto object-contain rounded-lg"
+                />
+              )}
             </div>
-            <p className="text-green-600 font-bold text-3xl mb-6">${product.price}</p>
-            <button
-              onClick={() => {
-                addToCart(product);
-                navigate('/carrito');
-              }}
-              className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 text-lg font-semibold transition"
-            >
-              Agregar al carrito
-            </button>
+
+            <div className="flex flex-col justify-center">
+              <div className="mb-6">
+                <span className="inline-block bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full mb-3 capitalize">
+                  {product.category}
+                </span>
+                <h1 className="text-3xl md:text-4xl font-bold mb-4 text-slate-800">{product.name}</h1>
+                <p className="text-slate-600 text-lg leading-relaxed mb-6">{product.description}</p>
+              </div>
+
+              <div className="bg-slate-50 rounded-xl p-4 mb-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <p className="text-sm text-slate-600 mb-1">Páginas</p>
+                    <p className="text-lg font-semibold text-slate-800">{product.pages}</p>
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-600 mb-1">Categoría</p>
+                    <p className="text-lg font-semibold text-slate-800 capitalize">{product.category}</p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mb-6">
+                <p className="text-sm text-slate-600 mb-2">Precio</p>
+                <p className="text-4xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                  ${product.price}
+                </p>
+              </div>
+
+              <button
+                onClick={() => {
+                  addToCart(product);
+                  navigate('/carrito');
+                }}
+                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 text-lg font-semibold transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Agregar al carrito
+              </button>
+            </div>
           </div>
         </div>
       </div>

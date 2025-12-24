@@ -334,54 +334,82 @@ export default function AdminPanel() {
   };
 
   return (
-    <div className="flex h-screen bg-gray-100 overflow-hidden">
+    <div className="flex h-screen bg-gradient-to-br from-slate-50 via-blue-50/20 to-indigo-50/20 overflow-hidden">
       {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white flex flex-col border-r border-gray-200 h-screen">
-        <div className="p-8 flex-1">
-          <h2 className="text-2xl font-bold mb-8 text-center text-gray-100">Administracion Libros</h2>
+      <aside className="w-64 bg-gradient-to-b from-slate-800 to-slate-900 text-white flex flex-col border-r border-slate-700 h-screen shadow-xl">
+        <div className="p-6 flex-1">
+          <div className="mb-8">
+            <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
+              Re-Libros
+            </h2>
+            <p className="text-xs text-slate-400">Panel de Administración</p>
+          </div>
           <nav className="flex flex-col gap-2">
             <button
               onClick={() => setActiveSection('dashboard')}
-              className={`text-left px-4 py-2 rounded transition text-gray-100 ${
-                activeSection === 'dashboard' ? 'bg-gray-700 font-semibold' : 'hover:bg-gray-700'
+              className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                activeSection === 'dashboard' 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+              </svg>
               Dashboard
             </button>
             <button
               onClick={() => setActiveSection('productos')}
-              className={`text-left px-4 py-2 rounded transition text-gray-100 ${
-                activeSection === 'productos' ? 'bg-gray-700 font-semibold' : 'hover:bg-gray-700'
+              className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                activeSection === 'productos' 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
               Productos
             </button>
             <button
               onClick={() => setActiveSection('pedidos')}
-              className={`text-left px-4 py-2 rounded transition text-gray-100 ${
-                activeSection === 'pedidos' ? 'bg-gray-700 font-semibold' : 'hover:bg-gray-700'
+              className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                activeSection === 'pedidos' 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+              </svg>
               Pedidos
             </button>
             <button
               onClick={() => setActiveSection('usuarios')}
-              className={`text-left px-4 py-2 rounded transition text-gray-100 ${
-                activeSection === 'usuarios' ? 'bg-gray-700 font-semibold' : 'hover:bg-gray-700'
+              className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                activeSection === 'usuarios' 
+                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
               }`}
             >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+              </svg>
               Usuarios
             </button>
           </nav>
         </div>
-        <div className="p-4 border-t border-gray-700">
+        <div className="p-4 border-t border-slate-700">
           <button
             onClick={() => {
               logout();
               navigate('/login');
             }}
-            className="w-full text-left px-4 py-3 rounded transition text-gray-100 hover:bg-red-600 hover:text-white flex items-center gap-2"
+            className="w-full text-left px-4 py-3 rounded-xl transition-all duration-200 text-slate-300 hover:bg-red-600 hover:text-white flex items-center gap-3"
           >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
             Cerrar Sesión
           </button>
         </div>
@@ -392,86 +420,92 @@ export default function AdminPanel() {
         {/* Dashboard */}
         {activeSection === 'dashboard' && (
           <div>
-            <h1 className="text-3xl font-bold mb-6">Dashboard</h1>
+            <h1 className="text-4xl font-bold mb-8 text-slate-800">Dashboard</h1>
             {loadingStats && <p className="text-gray-500">Cargando estadísticas...</p>}
             {errorStats && <p className="text-red-600">{errorStats}</p>}
             {stats && (
               <>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="font-semibold mb-4">Ventas por mes (últimos 12 meses)</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                  <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-slate-200">
+                    <h3 className="font-bold text-lg mb-4 text-slate-800">Ventas por mes (últimos 12 meses)</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <LineChart data={monthlySales}>
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="label" fontSize={12} />
-                        <YAxis fontSize={12} />
-                        <Tooltip formatter={(value) => `$${value.toLocaleString('es-AR')}`} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis dataKey="label" fontSize={12} stroke="#64748b" />
+                        <YAxis fontSize={12} stroke="#64748b" />
+                        <Tooltip 
+                          formatter={(value) => `$${value.toLocaleString('es-AR')}`}
+                          contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        />
                         <Legend />
-                        <Line type="monotone" dataKey="total" stroke="#2563eb" name="Ventas" />
+                        <Line type="monotone" dataKey="total" stroke="#2563eb" strokeWidth={3} name="Ventas" />
                       </LineChart>
                     </ResponsiveContainer>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <h3 className="font-semibold mb-4">Productos más vendidos</h3>
+                  <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-slate-200">
+                    <h3 className="font-bold text-lg mb-4 text-slate-800">Productos más vendidos</h3>
                     <ResponsiveContainer width="100%" height={250}>
                       <BarChart data={topProducts} layout="vertical">
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis type="number" fontSize={12} />
-                        <YAxis dataKey="name" type="category" fontSize={12} width={120} />
-                        <Tooltip formatter={(value) => `${value} ventas`} />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                        <XAxis type="number" fontSize={12} stroke="#64748b" />
+                        <YAxis dataKey="name" type="category" fontSize={12} width={120} stroke="#64748b" />
+                        <Tooltip 
+                          formatter={(value) => `${value} ventas`}
+                          contentStyle={{ backgroundColor: 'white', border: '1px solid #e2e8f0', borderRadius: '8px' }}
+                        />
                         <Legend />
-                        <Bar dataKey="count" fill="#22c55e" name="Ventas" />
+                        <Bar dataKey="count" fill="#22c55e" name="Ventas" radius={[0, 8, 8, 0]} />
                       </BarChart>
                     </ResponsiveContainer>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-xs text-gray-500 mb-1">Facturación total</div>
-                    <div className="text-2xl font-bold text-green-700">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                  <div className="bg-gradient-to-br from-emerald-500 to-teal-600 rounded-2xl shadow-lg p-6 text-white">
+                    <div className="text-sm opacity-90 mb-2">Facturación total</div>
+                    <div className="text-3xl font-bold">
                       {stats.totalFacturacion?.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) || '-'}
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-6 text-center">
-                    <div className="text-xs text-gray-500 mb-1">Facturación diaria</div>
-                    <div className="text-xl font-bold text-green-700">
+                  <div className="bg-gradient-to-br from-blue-500 to-indigo-600 rounded-2xl shadow-lg p-6 text-white">
+                    <div className="text-sm opacity-90 mb-2">Facturación diaria</div>
+                    <div className="text-2xl font-bold">
                       {stats.diaria?.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) || '-'}
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-6 text-center">
-                    <div className="text-xs text-gray-500 mb-1">Facturación semanal</div>
-                    <div className="text-xl font-bold text-green-700">
+                  <div className="bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl shadow-lg p-6 text-white">
+                    <div className="text-sm opacity-90 mb-2">Facturación semanal</div>
+                    <div className="text-2xl font-bold">
                       {stats.semanal?.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) || '-'}
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-6 text-center">
-                    <div className="text-xs text-gray-500 mb-1">Facturación mensual</div>
-                    <div className="text-xl font-bold text-green-700">
+                  <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-2xl shadow-lg p-6 text-white">
+                    <div className="text-sm opacity-90 mb-2">Facturación mensual</div>
+                    <div className="text-2xl font-bold">
                       {stats.mensual?.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' }) || '-'}
                     </div>
                   </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-xs text-gray-500 mb-1">Total de pedidos</div>
-                    <div className="text-2xl font-bold">{stats.pedidosTotales ?? '-'}</div>
-                    <div className="mt-4 flex flex-wrap gap-2">
-                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1 rounded text-xs font-semibold">
+                  <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-slate-200">
+                    <div className="text-sm text-slate-600 mb-2">Total de pedidos</div>
+                    <div className="text-3xl font-bold text-slate-800 mb-4">{stats.pedidosTotales ?? '-'}</div>
+                    <div className="flex flex-wrap gap-2">
+                      <span className="bg-yellow-100 text-yellow-800 px-3 py-1.5 rounded-lg text-xs font-semibold">
                         Pendientes: {stats.pedidosPorEstado?.pendiente ?? 0}
                       </span>
-                      <span className="bg-blue-100 text-blue-800 px-3 py-1 rounded text-xs font-semibold">
+                      <span className="bg-blue-100 text-blue-800 px-3 py-1.5 rounded-lg text-xs font-semibold">
                         En proceso: {stats.pedidosPorEstado?.['en proceso'] ?? 0}
                       </span>
-                      <span className="bg-green-100 text-green-800 px-3 py-1 rounded text-xs font-semibold">
+                      <span className="bg-green-100 text-green-800 px-3 py-1.5 rounded-lg text-xs font-semibold">
                         Listos: {stats.pedidosPorEstado?.['listo para retirar'] ?? 0}
                       </span>
-                      <span className="bg-gray-200 text-gray-800 px-3 py-1 rounded text-xs font-semibold">
+                      <span className="bg-slate-100 text-slate-800 px-3 py-1.5 rounded-lg text-xs font-semibold">
                         Entregados: {stats.pedidosPorEstado?.entregado ?? 0}
                       </span>
                     </div>
                   </div>
-                  <div className="bg-white rounded-lg shadow p-6">
-                    <div className="text-xs text-gray-500 mb-1">Pedidos más recientes</div>
+                  <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-slate-200">
+                    <div className="text-sm text-slate-600 mb-2">Pedidos más recientes</div>
                     <ul className="divide-y divide-gray-200">
                       {stats.recientes?.map((order) => (
                         <li key={order._id} className="py-2 flex flex-col sm:flex-row sm:items-center gap-2">
@@ -514,8 +548,8 @@ export default function AdminPanel() {
         {/* Productos */}
         {activeSection === 'productos' && (
           <div>
-            <h1 className="text-3xl font-bold mb-6">Gestión de Productos</h1>
-            <form onSubmit={handleProductSubmit} className="bg-white rounded-xl shadow p-8 mb-10 max-w-2xl mx-auto">
+            <h1 className="text-4xl font-bold mb-8 text-slate-800">Gestión de Productos</h1>
+            <form onSubmit={handleProductSubmit} className="bg-white rounded-2xl shadow-lg p-8 mb-10 max-w-2xl mx-auto border-2 border-slate-200">
               <h2 className="text-xl font-semibold mb-4">
                 {editingProduct ? 'Editar producto' : 'Crear nuevo producto'}
               </h2>
@@ -712,7 +746,7 @@ export default function AdminPanel() {
         {/* Pedidos - Continuará en siguiente archivo debido a tamaño */}
         {activeSection === 'pedidos' && (
           <div>
-            <h1 className="text-3xl font-bold mb-6">Gestión de Reservas</h1>
+            <h1 className="text-4xl font-bold mb-8 text-slate-800">Gestión de Reservas</h1>
             <div className="mb-6">
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -1054,7 +1088,7 @@ export default function AdminPanel() {
         {/* Usuarios */}
         {activeSection === 'usuarios' && (
           <div>
-            <h1 className="text-3xl font-bold mb-6">Gestión de Usuarios</h1>
+            <h1 className="text-4xl font-bold mb-8 text-slate-800">Gestión de Usuarios</h1>
             <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
               <input
                 type="text"
