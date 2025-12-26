@@ -13,6 +13,10 @@ export default function Catalog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const productsPerPage = 12;
 
   const selectedCategory = categoria || contextCategory;
   const categoryName = selectedCategory === 'escolares' ? 'Libros Escolares' : 'Libros de Inglés';
@@ -26,12 +30,15 @@ export default function Catalog() {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory));
+        const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory, currentPage, productsPerPage));
         if (!response.ok) throw new Error('Error al cargar productos');
         const data = await response.json();
-        // El backend devuelve { products, total } o puede ser un array directo
+        // El backend devuelve { products, total }
         const productsArray = Array.isArray(data) ? data : (data.products || []);
+        const total = data.total || productsArray.length;
         setProducts(productsArray);
+        setTotalProducts(total);
+        setTotalPages(Math.ceil(total / productsPerPage));
       } catch (err) {
         setError(err.message || 'Error al cargar productos');
       }
@@ -41,11 +48,123 @@ export default function Catalog() {
     if (selectedCategory) {
       fetchProducts();
     }
-  }, [selectedCategory]);
+  }, [selectedCategory, currentPage]);
+
+  // Resetear a página 1 cuando cambia el término de búsqueda
+  useEffect(() => {
+    if (currentPage !== 1) {
+      setCurrentPage(1);
+    }
+  }, [searchTerm]);
 
   const filteredProducts = products.filter((product) =>
     product.name.toLowerCase().includes(searchTerm.toLowerCase())
   );
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= totalPages) {
+      setCurrentPage(newPage);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  const renderPagination = () => {
+    if (totalPages <= 1) return null;
+
+    const pages = [];
+    const maxVisiblePages = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+    let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+    if (endPage - startPage < maxVisiblePages - 1) {
+      startPage = Math.max(1, endPage - maxVisiblePages + 1);
+    }
+
+    for (let i = startPage; i <= endPage; i++) {
+      pages.push(i);
+    }
+
+    return (
+      <div className="flex flex-wrap items-center justify-center gap-2 mt-8">
+        {/* Botón Anterior */}
+        <button
+          onClick={() => handlePageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            currentPage === 1
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              : 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-2 border-slate-200 hover:border-blue-300'
+          }`}
+        >
+          <svg className="w-5 h-5 inline-block mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+          Anterior
+        </button>
+
+        {/* Primera página si no está visible */}
+        {startPage > 1 && (
+          <>
+            <button
+              onClick={() => handlePageChange(1)}
+              className="px-4 py-2 rounded-lg font-medium bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-2 border-slate-200 hover:border-blue-300 transition-all duration-200"
+            >
+              1
+            </button>
+            {startPage > 2 && (
+              <span className="px-2 text-slate-400">...</span>
+            )}
+          </>
+        )}
+
+        {/* Páginas visibles */}
+        {pages.map((page) => (
+          <button
+            key={page}
+            onClick={() => handlePageChange(page)}
+            className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+              page === currentPage
+                ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30'
+                : 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-2 border-slate-200 hover:border-blue-300'
+            }`}
+          >
+            {page}
+          </button>
+        ))}
+
+        {/* Última página si no está visible */}
+        {endPage < totalPages && (
+          <>
+            {endPage < totalPages - 1 && (
+              <span className="px-2 text-slate-400">...</span>
+            )}
+            <button
+              onClick={() => handlePageChange(totalPages)}
+              className="px-4 py-2 rounded-lg font-medium bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-2 border-slate-200 hover:border-blue-300 transition-all duration-200"
+            >
+              {totalPages}
+            </button>
+          </>
+        )}
+
+        {/* Botón Siguiente */}
+        <button
+          onClick={() => handlePageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+          className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+            currentPage === totalPages
+              ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
+              : 'bg-white text-slate-700 hover:bg-blue-50 hover:text-blue-600 border-2 border-slate-200 hover:border-blue-300'
+          }`}
+        >
+          Siguiente
+          <svg className="w-5 h-5 inline-block ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/30">
@@ -100,54 +219,69 @@ export default function Catalog() {
             <svg className="w-24 h-24 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
             </svg>
-            <p className="text-slate-600 text-lg">No hay productos disponibles.</p>
+            <p className="text-slate-600 text-lg">
+              {searchTerm ? 'No se encontraron productos que coincidan con tu búsqueda.' : 'No hay productos disponibles.'}
+            </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            {filteredProducts.map((product) => (
-              <div 
-                key={product._id} 
-                onClick={() => navigate(`/producto/${product._id}`)}
-                className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-blue-200 cursor-pointer hover:-translate-y-2"
-              >
-                <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
-                  {product.image && (
-                    <img
-                      src={getImageUrl(product.image)}
-                      alt={product.name}
-                      className="w-full h-56 object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                    />
-                  )}
-                  <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-slate-600">
-                    {product.pages} págs
-                  </div>
-                </div>
-                <div className="p-5">
-                  <h3 className="font-bold text-lg mb-2 text-slate-800 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
-                    {product.name}
-                  </h3>
-                  <p className="text-slate-600 text-sm mb-3 line-clamp-2">{product.description}</p>
-                  <div className="flex items-center justify-between mb-4">
-                    <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
-                      ${product.price}
-                    </p>
-                  </div>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart(product);
-                    }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 flex items-center justify-center gap-2"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                    </svg>
-                    Agregar al carrito
-                  </button>
-                </div>
+          <>
+            {/* Información de paginación */}
+            {totalProducts > 0 && (
+              <div className="mb-6 text-sm text-slate-600">
+                Mostrando {((currentPage - 1) * productsPerPage) + 1} - {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
+                {searchTerm && ` (filtrados de ${totalProducts} total)`}
               </div>
-            ))}
-          </div>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+              {filteredProducts.map((product) => (
+                <div 
+                  key={product._id} 
+                  onClick={() => navigate(`/producto/${product._id}`)}
+                  className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-blue-200 cursor-pointer hover:-translate-y-2"
+                >
+                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
+                    {product.image && (
+                      <img
+                        src={getImageUrl(product.image)}
+                        alt={product.name}
+                        className="w-full h-56 object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                      />
+                    )}
+                    <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-slate-600">
+                      {product.pages} págs
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-bold text-lg mb-2 text-slate-800 line-clamp-2 group-hover:text-blue-600 transition-colors duration-200">
+                      {product.name}
+                    </h3>
+                    <p className="text-slate-600 text-sm mb-3 line-clamp-2">{product.description}</p>
+                    <div className="flex items-center justify-between mb-4">
+                      <p className="text-2xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+                        ${product.price}
+                      </p>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        addToCart(product);
+                      }}
+                      className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-3 rounded-xl hover:from-blue-700 hover:to-indigo-700 font-semibold transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                      </svg>
+                      Agregar al carrito
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Controles de paginación */}
+            {renderPagination()}
+          </>
         )}
       </div>
     </div>

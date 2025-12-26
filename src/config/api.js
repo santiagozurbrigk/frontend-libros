@@ -18,7 +18,7 @@ export const API_ENDPOINTS = {
   PRODUCTS: `${API_BASE_URL}/api/productos`,
   PRODUCTS_ADMIN: `${API_BASE_URL}/api/productos/admin`, // Todos los productos sin límite para admin
   PRODUCT_BY_ID: (id) => `${API_BASE_URL}/api/productos/${id}`,
-  PRODUCTS_BY_CATEGORY: (categoria) => `${API_BASE_URL}/api/productos?categoria=${categoria}`,
+  PRODUCTS_BY_CATEGORY: (categoria, page = 1, limit = 12) => `${API_BASE_URL}/api/productos?category=${categoria}&page=${page}&limit=${limit}`,
   
   // Pedidos
   ORDERS: `${API_BASE_URL}/api/pedidos`,
