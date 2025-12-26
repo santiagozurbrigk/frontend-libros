@@ -383,10 +383,10 @@ export default function AdminPanel() {
         // Generar código de barras con el ID del pedido
         JsBarcode(barcodeCanvasRef.current, barcodeOrder._id, {
           format: 'CODE128',
-          width: 1.2,
-          height: 60,
+          width: 0.8,
+          height: 100,
           displayValue: true,
-          fontSize: 14,
+          fontSize: 12,
           margin: 5,
           background: '#ffffff',
           lineColor: '#000000'
