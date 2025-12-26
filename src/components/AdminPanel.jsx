@@ -350,15 +350,31 @@ export default function AdminPanel() {
 
   // Callback ref para cuando el SVG se monte
   const barcodeCanvasCallback = (node) => {
+    console.log('barcodeCanvasCallback llamado, node:', node ? 'existe' : 'null', 'barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null');
     barcodeCanvasRef.current = node;
     if (node && barcodeOrder) {
-      console.log('SVG montado, generando código de barras...');
-      setBarcodeReady(true);
+      console.log('SVG montado y barcodeOrder existe, activando generación...');
+      // Pequeño delay para asegurar que el DOM esté completamente listo
+      setTimeout(() => {
+        setBarcodeReady(true);
+      }, 50);
     }
   };
 
-  // Generar código de barras cuando el SVG esté listo
+  // Generar código de barras cuando el SVG esté listo Y barcodeOrder exista
   useEffect(() => {
+    console.log('useEffect barcodeReady:', barcodeReady, 'barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null', 'canvas:', barcodeCanvasRef.current ? 'existe' : 'null');
+    
+    if (barcodeOrder && barcodeCanvasRef.current) {
+      // Si el SVG ya está montado, generar inmediatamente
+      if (barcodeCanvasRef.current && !barcodeReady) {
+        console.log('SVG ya montado, activando generación...');
+        setTimeout(() => {
+          setBarcodeReady(true);
+        }, 50);
+      }
+    }
+    
     if (barcodeReady && barcodeOrder && barcodeCanvasRef.current) {
       try {
         console.log('Generando código de barras para pedido:', barcodeOrder._id);
@@ -1382,10 +1398,12 @@ export default function AdminPanel() {
             {barcodeOrder && (
               <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 10000 }}>
                 <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative my-8">
+                  {console.log('Renderizando modal de código de barras para pedido:', barcodeOrder._id.slice(-4))}
                   <button
                     onClick={() => {
                       console.log('Cerrando modal de código de barras');
                       setBarcodeOrder(null);
+                      setBarcodeReady(false);
                     }}
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
                   >
