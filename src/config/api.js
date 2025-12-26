@@ -44,5 +44,6 @@ export const API_ENDPOINTS = {
   USER_ORDERS_BY_USER_ID: (userId) => `${API_BASE_URL}/api/pedidos?userId=${userId}`,
 };
 
+export { API_BASE_URL };
 export default API_BASE_URL;
 
