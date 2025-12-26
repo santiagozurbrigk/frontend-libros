@@ -29,17 +29,21 @@ function AppRoutes() {
   const { isAuthenticated, user, loading } = useAuth();
   const location = useLocation();
 
-  // Redirecciones automáticas
+  // Redirecciones automáticas - solo cuando no está cargando
   if (!loading) {
+    // Si no está autenticado, redirigir a login (excepto si ya está en login o registro)
     if (!isAuthenticated && location.pathname !== '/login' && location.pathname !== '/registro') {
       return <Navigate to="/login" replace />;
     }
-    if (isAuthenticated && user?.isAdmin && location.pathname !== '/admin') {
+    // Si está autenticado como admin, redirigir a admin (excepto si ya está ahí)
+    if (isAuthenticated && user?.isAdmin && location.pathname !== '/admin' && location.pathname !== '/login' && location.pathname !== '/registro') {
       return <Navigate to="/admin" replace />;
     }
+    // Si está autenticado como usuario normal, redirigir desde admin o root
     if (isAuthenticated && !user?.isAdmin && (location.pathname === '/admin' || location.pathname === '/')) {
       return <Navigate to="/seleccionar-categoria" replace />;
     }
+    // Si está autenticado como usuario normal y está en login, redirigir
     if (isAuthenticated && !user?.isAdmin && location.pathname === '/login') {
       return <Navigate to="/seleccionar-categoria" replace />;
     }

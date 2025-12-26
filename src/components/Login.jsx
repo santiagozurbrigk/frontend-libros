@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { API_ENDPOINTS } from '../config/api';
@@ -10,8 +10,19 @@ export default function Login() {
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [retryAfter, setRetryAfter] = useState(null);
+  const intervalRef = useRef(null);
   const { login } = useAuth();
   const navigate = useNavigate();
+
+  // Limpiar intervalo cuando el componente se desmonte
+  useEffect(() => {
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, []);
 
   const validateField = (field, value) => {
     let error = '';
@@ -41,6 +52,10 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Prevenir múltiples submits o si estamos en período de espera
+    if (loading || retryAfter !== null) return;
+    
     let hasErrors = false;
 
     Object.entries(formData).forEach(([key, value]) => {
@@ -58,6 +73,37 @@ export default function Login() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(formData)
         });
+        
+        // Manejar error 429 específicamente
+        if (response.status === 429) {
+          const retryAfterHeader = response.headers.get('Retry-After');
+          const retrySeconds = retryAfterHeader ? parseInt(retryAfterHeader) : 60;
+          setRetryAfter(retrySeconds);
+          setMessage(`Demasiados intentos. Por favor espera ${retrySeconds} segundos antes de intentar nuevamente.`);
+          setLoading(false);
+          
+          // Limpiar intervalo anterior si existe
+          if (intervalRef.current) {
+            clearInterval(intervalRef.current);
+          }
+          
+          // Contador regresivo
+          intervalRef.current = setInterval(() => {
+            setRetryAfter((prev) => {
+              if (prev <= 1) {
+                if (intervalRef.current) {
+                  clearInterval(intervalRef.current);
+                  intervalRef.current = null;
+                }
+                return null;
+              }
+              return prev - 1;
+            });
+          }, 1000);
+          
+          return;
+        }
+        
         const data = await response.json();
         if (response.ok) {
           setMessage('¡Login exitoso!');
@@ -73,10 +119,11 @@ export default function Login() {
         } else {
           setMessage(data.msg || 'Ocurrió un error inesperado. Intenta nuevamente o contacta soporte.');
         }
-      } catch {
+      } catch (error) {
         setMessage('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     }
   };
 
@@ -140,7 +187,7 @@ export default function Login() {
           <button
             type="submit"
             className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 text-lg font-semibold transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:translate-y-0 mt-6"
-            disabled={loading}
+            disabled={loading || retryAfter !== null}
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
@@ -161,7 +208,12 @@ export default function Login() {
                 ? 'bg-green-50 border-2 border-green-200 text-green-700' 
                 : 'bg-red-50 border-2 border-red-200 text-red-700'
             }`}>
-              <p className="text-sm font-medium">{message}</p>
+              <p className="text-sm font-medium">
+                {message}
+                {retryAfter !== null && retryAfter > 0 && (
+                  <span className="block mt-2 text-xs">Espera {retryAfter} segundos...</span>
+                )}
+              </p>
             </div>
           )}
 
