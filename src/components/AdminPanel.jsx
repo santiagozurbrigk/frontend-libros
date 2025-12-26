@@ -1445,7 +1445,7 @@ export default function AdminPanel() {
                   </div>
                   
                   {/* Información del cliente */}
-                  <div className="text-left space-y-2">
+                  <div className="text-center space-y-2">
                     <div className="text-base text-slate-700">
                       Cliente: {barcodeOrder.user?.nombre || 'Usuario'}
                     </div>
@@ -1455,11 +1455,6 @@ export default function AdminPanel() {
                       Fecha: {new Date(barcodeOrder.createdAt).toLocaleDateString('es-AR')}
                     </div>
                     
-                    {/* Importe */}
-                    <div className="text-lg font-bold text-slate-800 mt-4">
-                      Importe: ${barcodeOrder.total.toLocaleString('es-AR')}
-                    </div>
-                    
                     {/* Lista de productos */}
                     <div className="mt-4">
                       <div className="text-base font-semibold text-slate-800 mb-2">
@@ -1467,11 +1462,16 @@ export default function AdminPanel() {
                       </div>
                       <div className="space-y-1 text-sm text-slate-700">
                         {barcodeOrder.products.map((item, idx) => (
-                          <div key={idx} className="text-left">
+                          <div key={idx} className="text-center">
                             {item.product?.name || '-'} x{item.quantity}
                           </div>
                         ))}
                       </div>
+                    </div>
+                    
+                    {/* Importe - Después de los productos */}
+                    <div className="text-lg font-bold text-slate-800 mt-4">
+                      Importe: ${barcodeOrder.total.toLocaleString('es-AR')}
                     </div>
                   </div>
                 </div>
