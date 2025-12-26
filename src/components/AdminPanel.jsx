@@ -955,18 +955,18 @@ export default function AdminPanel() {
                   </div>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="min-w-full text-sm">
+                  <table className="w-full text-sm" style={{ minWidth: '800px' }}>
                     <thead>
                       <tr className="bg-gray-100 text-gray-700 uppercase text-xs">
-                        <th className="px-4 py-2 text-left whitespace-nowrap">ID Pedido</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Cliente</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Contacto</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Productos</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Descripción</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Total</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Estado</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Fecha</th>
-                        <th className="px-4 py-2 text-left whitespace-nowrap">Acciones</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap">ID Pedido</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap">Cliente</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap max-w-[150px]">Contacto</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap max-w-[180px]">Productos</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap max-w-[120px]">Descripción</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap">Total</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap">Estado</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap">Fecha</th>
+                        <th className="px-2 py-1.5 text-left whitespace-nowrap">Acciones</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -976,38 +976,38 @@ export default function AdminPanel() {
                           id={`order-${order._id}`}
                           className="border-b hover:bg-gray-50 transition"
                         >
-                          <td className="px-4 py-2 whitespace-nowrap">
-                            <div className="font-mono text-sm font-bold text-blue-600">
+                          <td className="px-2 py-1.5 whitespace-nowrap">
+                            <div className="font-mono text-xs font-bold text-blue-600">
                               #{order._id.slice(-4)}
                             </div>
                           </td>
-                          <td className="px-4 py-2">
+                          <td className="px-2 py-1.5">
                             <div>
-                              <div className="font-semibold">{order.user?.nombre || 'Usuario'}</div>
+                              <div className="font-semibold text-xs">{order.user?.nombre || 'Usuario'}</div>
                             </div>
                           </td>
-                          <td className="px-4 py-2">
+                          <td className="px-2 py-1.5 max-w-[150px]">
                             <div>
-                              <div className="text-sm break-words max-w-xs">{order.user?.email || '-'}</div>
+                              <div className="text-xs break-words">{order.user?.email || '-'}</div>
                               <div className="text-xs text-gray-500">{order.user?.telefono || '-'}</div>
                             </div>
                           </td>
-                          <td className="px-4 py-2">
-                            <div className="max-w-xs">
+                          <td className="px-2 py-1.5 max-w-[180px]">
+                            <div>
                               {order.products.map((item, idx) => (
-                                <div key={idx} className="text-xs mb-1 break-words">
+                                <div key={idx} className="text-xs mb-0.5 break-words">
                                   {item.product?.name} x{item.quantity}
                                 </div>
                               ))}
                             </div>
                           </td>
-                          <td className="px-4 py-2">
-                            <div className="max-w-xs text-xs text-gray-600 break-words">{order.description || '-'}</div>
+                          <td className="px-2 py-1.5 max-w-[120px]">
+                            <div className="text-xs text-gray-600 break-words line-clamp-2">{order.description || '-'}</div>
                           </td>
-                          <td className="px-4 py-2 font-bold text-green-700 whitespace-nowrap">${order.total}</td>
-                          <td className="px-4 py-2">
+                          <td className="px-2 py-1.5 font-bold text-green-700 whitespace-nowrap text-xs">${order.total}</td>
+                          <td className="px-2 py-1.5">
                             <span
-                              className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                              className={`px-1.5 py-0.5 rounded-full text-xs font-semibold whitespace-nowrap ${
                                 order.status === 'pendiente'
                                   ? 'bg-yellow-100 text-yellow-800'
                                   : order.status === 'en proceso'
@@ -1020,18 +1020,18 @@ export default function AdminPanel() {
                               {order.status}
                             </span>
                           </td>
-                          <td className="px-4 py-2 text-xs text-gray-500 whitespace-nowrap">
+                          <td className="px-2 py-1.5 text-xs text-gray-500 whitespace-nowrap">
                             {new Date(order.createdAt).toLocaleDateString()}
                           </td>
-                          <td className="px-4 py-2 whitespace-nowrap">
+                          <td className="px-2 py-1.5 whitespace-nowrap">
                             <button
                               onClick={() => {
                                 setSelectedOrder(order);
                                 setOrderStatus(order.status);
                               }}
-                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-2 py-1 rounded-lg text-xs font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-1"
                             >
-                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                               </svg>
