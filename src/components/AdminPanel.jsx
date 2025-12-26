@@ -52,6 +52,11 @@ export default function AdminPanel() {
   const barcodeCanvasRef = useRef(null);
   const [barcodeReady, setBarcodeReady] = useState(false);
 
+  // Debug: Log cuando barcodeOrder cambia
+  useEffect(() => {
+    console.log('barcodeOrder cambió:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null');
+  }, [barcodeOrder]);
+
   // Usuarios states
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
@@ -1189,7 +1194,9 @@ export default function AdminPanel() {
                       onClick={() => {
                         console.log('Botón de código de barras clickeado, pedido:', selectedOrder);
                         if (selectedOrder) {
+                          console.log('Estableciendo barcodeOrder...');
                           setBarcodeOrder(selectedOrder);
+                          console.log('barcodeOrder establecido');
                         } else {
                           console.error('selectedOrder es null');
                         }
@@ -1365,11 +1372,16 @@ export default function AdminPanel() {
             )}
 
             {/* Modal de código de barras */}
-            {barcodeOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative">
+            {(() => {
+              console.log('Renderizando modal de código de barras, barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null');
+              return barcodeOrder && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+                  <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative">
                   <button
-                    onClick={() => setBarcodeOrder(null)}
+                    onClick={() => {
+                      console.log('Cerrando modal de código de barras');
+                      setBarcodeOrder(null);
+                    }}
                     className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
                   >
                     ×
