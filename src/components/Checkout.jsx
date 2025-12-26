@@ -81,12 +81,9 @@ export default function Checkout() {
               </span>
             </div>
           </div>
-          <h1 className="text-3xl md:text-4xl font-bold mb-4 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold mb-8 bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
             ¡Reserva realizada con éxito!
           </h1>
-          <p className="mb-8 text-slate-600 text-lg leading-relaxed">
-            Gracias por tu reserva. Te avisaremos cuando tus libros estén listos para retirar.
-          </p>
           <button
             className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-8 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 text-lg font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-200"
             onClick={() => navigate('/seleccionar-categoria')}
@@ -179,9 +176,6 @@ export default function Checkout() {
               <li>Transferencia bancaria</li>
               <li>Mercado Pago</li>
             </ul>
-            <p className="text-sm text-blue-600 pt-2 border-t border-blue-200">
-              Te contactaremos vía email cuando tus libros estén listos para retirar.
-            </p>
           </div>
         </div>
 
