@@ -1249,8 +1249,7 @@ export default function AdminPanel() {
                   </div>
                 </div>
               </div>
-              );
-            })()}
+            )}
           </div>
         )}
 
@@ -1373,11 +1372,9 @@ export default function AdminPanel() {
             )}
 
             {/* Modal de código de barras */}
-            {(() => {
-              console.log('Renderizando modal de código de barras, barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null');
-              return barcodeOrder && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
-                  <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative">
+            {barcodeOrder && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4" style={{ zIndex: 9999 }}>
+                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative">
                   <button
                     onClick={() => {
                       console.log('Cerrando modal de código de barras');

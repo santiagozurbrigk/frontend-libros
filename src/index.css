@@ -19,15 +19,18 @@
     page-break-after: always;
   }
   
-  .print\\:hidden {
+  /* Ocultar elementos con clase print-hidden al imprimir */
+  [class*="print:hidden"] {
     display: none !important;
   }
   
-  .print\\:border-0 {
+  /* Quitar borde de elementos con clase print-border-0 al imprimir */
+  [class*="print:border-0"] {
     border: 0 !important;
   }
   
-  .print\\:p-4 {
+  /* Ajustar padding de elementos con clase print-p-4 al imprimir */
+  [class*="print:p-4"] {
     padding: 1rem !important;
   }
 }
