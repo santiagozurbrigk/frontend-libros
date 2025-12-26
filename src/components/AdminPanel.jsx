@@ -276,8 +276,8 @@ export default function AdminPanel() {
     setSavingStatus(false);
   };
 
-  const deleteOrder = async (orderId) => {
-    if (!confirm('¿Estás seguro de eliminar este pedido?')) return;
+  const deleteOrder = async (orderId, skipConfirm = false) => {
+    if (!skipConfirm && !confirm('¿Estás seguro de eliminar este pedido?')) return;
     setDeletingOrder((prev) => ({ ...prev, [orderId]: true }));
     try {
       const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(orderId), {
@@ -288,6 +288,11 @@ export default function AdminPanel() {
       });
       if (response.ok) {
         loadOrders();
+        // Cerrar el modal si estaba abierto
+        if (selectedOrder && selectedOrder._id === orderId) {
+          setSelectedOrder(null);
+          setOrderStatus('');
+        }
       }
     } catch {}
     setDeletingOrder((prev) => ({ ...prev, [orderId]: false }));
@@ -878,159 +883,190 @@ export default function AdminPanel() {
                       : `Total de pedidos: ${orders.length}`}
                   </div>
                 </div>
-                <table className="min-w-full text-sm">
-                  <thead>
-                    <tr className="bg-gray-100 text-gray-700 uppercase text-xs">
-                      <th className="px-4 py-2 text-left">ID Pedido</th>
-                      <th className="px-4 py-2 text-left">Cliente</th>
-                      <th className="px-4 py-2 text-left">Contacto</th>
-                      <th className="px-4 py-2 text-left">Productos</th>
-                      <th className="px-4 py-2 text-left">Descripción</th>
-                      <th className="px-4 py-2 text-left">Total</th>
-                      <th className="px-4 py-2 text-left">Estado</th>
-                      <th className="px-4 py-2 text-left">Fecha</th>
-                      <th className="px-4 py-2 text-left">Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {orders.map((order) => (
-                      <tr
-                        key={order._id}
-                        id={`order-${order._id}`}
-                        className="border-b hover:bg-gray-50 transition"
-                      >
-                        <td className="px-4 py-2">
-                          <div className="font-mono text-sm font-bold text-blue-600">
-                            #{order._id.slice(-4)}
-                          </div>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div>
-                            <div className="font-semibold">{order.user?.nombre || 'Usuario'}</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div>
-                            <div className="text-sm">{order.user?.email || '-'}</div>
-                            <div className="text-xs text-gray-500">{order.user?.telefono || '-'}</div>
-                          </div>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="max-w-xs">
-                            {order.products.map((item, idx) => (
-                              <div key={idx} className="text-xs mb-1">
-                                {item.product?.name} x{item.quantity}
-                              </div>
-                            ))}
-                          </div>
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="max-w-xs text-xs text-gray-600">{order.description || '-'}</div>
-                        </td>
-                        <td className="px-4 py-2 font-bold text-green-700">${order.total}</td>
-                        <td className="px-4 py-2">
-                          <span
-                            className={`px-2 py-1 rounded-full text-xs font-semibold ${
-                              order.status === 'pendiente'
-                                ? 'bg-yellow-100 text-yellow-800'
-                                : order.status === 'en proceso'
-                                ? 'bg-blue-100 text-blue-800'
-                                : order.status === 'listo para retirar'
-                                ? 'bg-green-100 text-green-800'
-                                : 'bg-gray-100 text-gray-800'
-                            }`}
-                          >
-                            {order.status}
-                          </span>
-                        </td>
-                        <td className="px-4 py-2 text-xs text-gray-500">
-                          {new Date(order.createdAt).toLocaleDateString()}
-                        </td>
-                        <td className="px-4 py-2">
-                          <div className="flex gap-2">
+                <div className="overflow-x-auto">
+                  <table className="min-w-full text-sm">
+                    <thead>
+                      <tr className="bg-gray-100 text-gray-700 uppercase text-xs">
+                        <th className="px-4 py-2 text-left whitespace-nowrap">ID Pedido</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Cliente</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Contacto</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Productos</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Descripción</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Total</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Estado</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Fecha</th>
+                        <th className="px-4 py-2 text-left whitespace-nowrap">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {orders.map((order) => (
+                        <tr
+                          key={order._id}
+                          id={`order-${order._id}`}
+                          className="border-b hover:bg-gray-50 transition"
+                        >
+                          <td className="px-4 py-2 whitespace-nowrap">
+                            <div className="font-mono text-sm font-bold text-blue-600">
+                              #{order._id.slice(-4)}
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div>
+                              <div className="font-semibold">{order.user?.nombre || 'Usuario'}</div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div>
+                              <div className="text-sm break-words max-w-xs">{order.user?.email || '-'}</div>
+                              <div className="text-xs text-gray-500">{order.user?.telefono || '-'}</div>
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="max-w-xs">
+                              {order.products.map((item, idx) => (
+                                <div key={idx} className="text-xs mb-1 break-words">
+                                  {item.product?.name} x{item.quantity}
+                                </div>
+                              ))}
+                            </div>
+                          </td>
+                          <td className="px-4 py-2">
+                            <div className="max-w-xs text-xs text-gray-600 break-words">{order.description || '-'}</div>
+                          </td>
+                          <td className="px-4 py-2 font-bold text-green-700 whitespace-nowrap">${order.total}</td>
+                          <td className="px-4 py-2">
+                            <span
+                              className={`px-2 py-1 rounded-full text-xs font-semibold whitespace-nowrap ${
+                                order.status === 'pendiente'
+                                  ? 'bg-yellow-100 text-yellow-800'
+                                  : order.status === 'en proceso'
+                                  ? 'bg-blue-100 text-blue-800'
+                                  : order.status === 'listo para retirar'
+                                  ? 'bg-green-100 text-green-800'
+                                  : 'bg-gray-100 text-gray-800'
+                              }`}
+                            >
+                              {order.status}
+                            </span>
+                          </td>
+                          <td className="px-4 py-2 text-xs text-gray-500 whitespace-nowrap">
+                            {new Date(order.createdAt).toLocaleDateString()}
+                          </td>
+                          <td className="px-4 py-2 whitespace-nowrap">
                             <button
                               onClick={() => {
                                 setSelectedOrder(order);
                                 setOrderStatus(order.status);
                               }}
-                              className="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded text-sm"
+                              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-4 py-2 rounded-lg text-sm font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center gap-2"
                             >
-                              Cambiar Estado
+                              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                              </svg>
+                              Detalle
                             </button>
-                            <button
-                              onClick={() => generateBarcode(order._id)}
-                              className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded text-sm flex items-center gap-1"
-                              title="Generar código de barras"
-                            >
-                              Código
-                            </button>
-                            <button
-                              onClick={() => deleteOrder(order._id)}
-                              disabled={deletingOrder[order._id]}
-                              className="bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded text-sm disabled:opacity-50 flex items-center gap-1"
-                            >
-                              {deletingOrder[order._id] ? 'Eliminando...' : 'Eliminar'}
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
               </div>
             )}
 
-            {/* Modal para cambiar estado */}
+            {/* Modal de detalles del pedido */}
             {selectedOrder && (
-              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-                <div className="bg-white rounded-lg shadow-lg p-8 max-w-lg w-full relative">
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full relative my-8">
                   <button
                     onClick={() => {
                       setSelectedOrder(null);
                       setOrderStatus('');
                     }}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-xl"
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
                   >
                     ×
                   </button>
-                  <h2 className="text-2xl font-bold mb-4">Detalles del pedido</h2>
-                  <div className="mb-2">
-                    <b>ID:</b> #{selectedOrder._id.slice(-4)}
+                  <h2 className="text-3xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                    <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    Detalles del Pedido #{selectedOrder._id.slice(-4)}
+                  </h2>
+                  
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                    <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-lg p-4 border-2 border-blue-100">
+                      <h3 className="font-semibold text-blue-900 mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        Información del Cliente
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div><b className="text-slate-700">Nombre:</b> <span className="text-slate-600">{selectedOrder.user?.nombre || '-'}</span></div>
+                        <div><b className="text-slate-700">Email:</b> <span className="text-slate-600 break-words">{selectedOrder.user?.email || '-'}</span></div>
+                        <div><b className="text-slate-700">Teléfono:</b> <span className="text-slate-600">{selectedOrder.user?.telefono || '-'}</span></div>
+                      </div>
+                    </div>
+                    
+                    <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg p-4 border-2 border-green-100">
+                      <h3 className="font-semibold text-green-900 mb-3 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                        </svg>
+                        Información del Pedido
+                      </h3>
+                      <div className="space-y-2 text-sm">
+                        <div><b className="text-slate-700">ID:</b> <span className="font-mono text-blue-600 font-bold">#{selectedOrder._id.slice(-4)}</span></div>
+                        <div><b className="text-slate-700">Fecha:</b> <span className="text-slate-600">
+                          {new Date(selectedOrder.createdAt).toLocaleString('es-AR', {
+                            dateStyle: 'short',
+                            timeStyle: 'short'
+                          })}
+                        </span></div>
+                        <div><b className="text-slate-700">Total:</b> <span className="text-green-700 font-bold text-lg">
+                          {selectedOrder.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
+                        </span></div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mb-2">
-                    <b>Cliente:</b> {selectedOrder.user?.nombre || '-'}
-                  </div>
-                  <div className="mb-2">
-                    <b>Email:</b> {selectedOrder.user?.email || '-'}
-                  </div>
-                  <div className="mb-2">
-                    <b>Teléfono:</b> {selectedOrder.user?.telefono || '-'}
-                  </div>
-                  <div className="mb-2">
-                    <b>Fecha:</b>{' '}
-                    {new Date(selectedOrder.createdAt).toLocaleString('es-AR', {
-                      dateStyle: 'short',
-                      timeStyle: 'short'
-                    })}
-                  </div>
-                  <div className="mb-2">
-                    <b>Productos:</b>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-2">
+
+                  {selectedOrder.description && (
+                    <div className="mb-6 bg-yellow-50 border-2 border-yellow-200 rounded-lg p-4">
+                      <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+                        </svg>
+                        Descripción
+                      </h3>
+                      <p className="text-sm text-slate-700">{selectedOrder.description}</p>
+                    </div>
+                  )}
+
+                  <div className="mb-6">
+                    <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                      </svg>
+                      Productos ({selectedOrder.products.length})
+                    </h3>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       {selectedOrder.products.map((item, idx) => (
-                        <div key={idx} className="bg-gray-50 rounded-lg shadow p-3 flex gap-3 items-center">
+                        <div key={idx} className="bg-gray-50 rounded-lg shadow-md p-4 flex gap-4 items-start border-2 border-gray-200 hover:border-blue-300 transition">
                           {item.product?.image && (
                             <img
                               src={getImageUrl(item.product.image)}
                               alt={item.product.name}
-                              className="w-16 h-20 object-cover rounded border"
+                              className="w-20 h-24 object-cover rounded border-2 border-gray-300"
                             />
                           )}
-                          <div className="flex-1">
-                            <div className="font-bold text-sm mb-1">{item.product?.name || '-'}</div>
+                          <div className="flex-1 min-w-0">
+                            <div className="font-bold text-sm mb-2 text-slate-800 break-words">{item.product?.name || '-'}</div>
                             <div className="text-xs text-gray-600 mb-1">
-                              Cantidad: <b>{item.quantity}</b>
+                              Cantidad: <b className="text-blue-600">{item.quantity}</b>
                             </div>
-                            <div className="text-xs text-gray-500">
+                            <div className="text-xs text-gray-500 mb-1">
                               Precio unitario:{' '}
                               {item.product?.price?.toLocaleString('es-AR', {
                                 style: 'currency',
@@ -1049,40 +1085,102 @@ export default function AdminPanel() {
                       ))}
                     </div>
                   </div>
-                  <div className="mb-2">
-                    <b>Total:</b>{' '}
-                    {selectedOrder.total.toLocaleString('es-AR', { style: 'currency', currency: 'ARS' })}
+
+                  <div className="border-t-2 border-gray-200 pt-6">
+                    <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Cambiar Estado del Pedido
+                    </h3>
+                    <div className="mb-4">
+                      <select
+                        value={orderStatus}
+                        onChange={(e) => setOrderStatus(e.target.value)}
+                        className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                      >
+                        <option value="pendiente">Pendiente</option>
+                        <option value="en proceso">En proceso</option>
+                        <option value="listo para retirar">Listo para retirar</option>
+                        <option value="entregado">Entregado</option>
+                      </select>
+                    </div>
+                    {statusError && (
+                      <div className="mb-4 bg-red-50 border-2 border-red-200 rounded-lg p-3 text-red-700 text-sm">
+                        {statusError}
+                      </div>
+                    )}
                   </div>
-                  <div className="mb-4">
-                    <b>Estado:</b>
-                    <select
-                      value={orderStatus}
-                      onChange={(e) => setOrderStatus(e.target.value)}
-                      className="border rounded px-2 py-1 ml-2"
-                    >
-                      <option value="pendiente">Pendiente</option>
-                      <option value="en proceso">En proceso</option>
-                      <option value="listo para retirar">Listo para retirar</option>
-                      <option value="entregado">Entregado</option>
-                    </select>
-                  </div>
-                  {statusError && <p className="text-red-600 mb-2">{statusError}</p>}
-                  <div className="flex justify-end gap-2">
+
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6">
                     <button
                       onClick={handleOrderStatusChange}
-                      className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded transition"
                       disabled={savingStatus}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
-                      {savingStatus ? 'Guardando...' : 'Guardar cambios'}
+                      {savingStatus ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Guardando...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Guardar Cambios de Estado
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => generateBarcode(selectedOrder._id)}
+                      className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                      </svg>
+                      Generar Código de Barras
+                    </button>
+                    <button
+                      onClick={() => {
+                        if (confirm('¿Estás seguro de eliminar este pedido? Esta acción no se puede deshacer.')) {
+                          deleteOrder(selectedOrder._id, true);
+                        }
+                      }}
+                      disabled={deletingOrder[selectedOrder._id]}
+                      className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {deletingOrder[selectedOrder._id] ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Eliminando...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                          </svg>
+                          Eliminar Pedido
+                        </>
+                      )}
                     </button>
                     <button
                       onClick={() => {
                         setSelectedOrder(null);
                         setOrderStatus('');
                       }}
-                      className="bg-gray-300 hover:bg-gray-400 text-gray-800 px-4 py-2 rounded transition"
+                      className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
                     >
-                      Cancelar
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Cerrar
                     </button>
                   </div>
                 </div>
