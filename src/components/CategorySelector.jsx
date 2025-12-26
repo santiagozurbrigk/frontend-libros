@@ -22,7 +22,7 @@ export default function CategorySelector({ onCategorySelect }) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="max-w-5xl w-full">
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">Bienvenido a Re-Libros</h1>
+          <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">Bienvenido a Libreria Low Cost</h1>
           <p className="text-lg text-slate-600">Selecciona la categoría que te interesa</p>
         </div>
         

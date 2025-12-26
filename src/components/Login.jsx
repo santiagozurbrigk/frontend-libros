@@ -84,7 +84,7 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-slate-800 mb-2">Re-Libros</h1>
+          <h1 className="text-4xl font-bold text-slate-800 mb-2">Libreria Low Cost</h1>
           <p className="text-slate-600">Tu librería de confianza</p>
         </div>
         

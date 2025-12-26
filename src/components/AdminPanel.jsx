@@ -422,7 +422,7 @@ export default function AdminPanel() {
         <div className="p-6 flex-1">
           <div className="mb-8">
             <h2 className="text-2xl font-bold mb-2 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Re-Libros
+              Libreria Low Cost
             </h2>
             <p className="text-xs text-slate-400">Panel de Administración</p>
           </div>

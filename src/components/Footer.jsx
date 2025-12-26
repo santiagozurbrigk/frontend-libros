@@ -5,7 +5,7 @@ export default function Footer() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
           <div>
             <h3 className="text-2xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
-              Re-Libros
+              Libreria Low Cost
             </h3>
             <p className="text-slate-400 leading-relaxed">
               Tu librería de confianza para libros escolares y de inglés. Reserva tus libros favoritos de manera fácil y rápida.
@@ -54,7 +54,7 @@ export default function Footer() {
         
         <div className="border-t border-slate-700 pt-8 text-center">
           <p className="text-slate-400">
-            © {new Date().getFullYear()} Re-Libros. Todos los derechos reservados.
+            © {new Date().getFullYear()} Libreria Low Cost. Todos los derechos reservados.
           </p>
         </div>
       </div>

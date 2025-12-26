@@ -27,7 +27,7 @@ export default function Navbar() {
               onClick={closeMenu}
               className="text-2xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent hover:from-blue-700 hover:to-indigo-700 transition-all duration-200"
             >
-              Re-Libros
+              Libreria Low Cost
             </Link>
           </div>
 
