@@ -1194,9 +1194,16 @@ export default function AdminPanel() {
                       onClick={() => {
                         console.log('Botón de código de barras clickeado, pedido:', selectedOrder);
                         if (selectedOrder) {
-                          console.log('Estableciendo barcodeOrder...');
-                          setBarcodeOrder(selectedOrder);
-                          console.log('barcodeOrder establecido');
+                          console.log('Estableciendo barcodeOrder y cerrando modal de detalles...');
+                          // Cerrar el modal de detalles primero
+                          const orderToBarcode = selectedOrder;
+                          setSelectedOrder(null);
+                          setOrderStatus('');
+                          // Abrir el modal de código de barras después de un pequeño delay para asegurar que el DOM se actualice
+                          setTimeout(() => {
+                            setBarcodeOrder(orderToBarcode);
+                            console.log('barcodeOrder establecido');
+                          }, 100);
                         } else {
                           console.error('selectedOrder es null');
                         }
