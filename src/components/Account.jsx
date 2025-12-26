@@ -116,7 +116,7 @@ export default function Account() {
                   <div className="bg-slate-50 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-2">
-                        <span className="text-xs font-mono text-slate-500">#{order._id.slice(-4)}</span>
+                        <span className="text-xs font-mono text-slate-500">#{order.orderNumber || order._id.slice(-4)}</span>
                         <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(order.status)}`}>
                           {order.status.charAt(0).toUpperCase() + order.status.slice(1)}
                         </span>

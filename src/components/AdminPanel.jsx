@@ -54,7 +54,7 @@ export default function AdminPanel() {
 
   // Debug: Log cuando barcodeOrder cambia
   useEffect(() => {
-    console.log('barcodeOrder cambió:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null');
+    console.log('barcodeOrder cambió:', barcodeOrder ? `Pedido ${barcodeOrder.orderNumber || barcodeOrder._id?.slice(-4)}` : 'null');
   }, [barcodeOrder]);
 
   // Usuarios states
@@ -323,7 +323,7 @@ export default function AdminPanel() {
     if (e.key === 'Enter') {
       const scannedId = scannerInput.trim();
       if (scannedId) {
-        const order = orders.find((o) => o._id.slice(-4) === scannedId || o._id.includes(scannedId));
+        const order = orders.find((o) => o.orderNumber?.toString() === scannedId || o.orderNumber?.toString().includes(scannedId));
         if (order) {
           const element = document.getElementById(`order-${order._id}`);
           if (element) {
@@ -350,7 +350,7 @@ export default function AdminPanel() {
 
   // Callback ref para cuando el SVG se monte
   const barcodeCanvasCallback = (node) => {
-    console.log('barcodeCanvasCallback llamado, node:', node ? 'existe' : 'null', 'barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null');
+    console.log('barcodeCanvasCallback llamado, node:', node ? 'existe' : 'null', 'barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder.orderNumber || barcodeOrder._id?.slice(-4)}` : 'null');
     barcodeCanvasRef.current = node;
     if (node && barcodeOrder) {
       console.log('SVG montado y barcodeOrder existe, activando generación...');
@@ -363,7 +363,7 @@ export default function AdminPanel() {
 
   // Generar código de barras cuando el SVG esté listo Y barcodeOrder exista
   useEffect(() => {
-    console.log('useEffect barcodeReady:', barcodeReady, 'barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder._id?.slice(-4)}` : 'null', 'canvas:', barcodeCanvasRef.current ? 'existe' : 'null');
+    console.log('useEffect barcodeReady:', barcodeReady, 'barcodeOrder:', barcodeOrder ? `Pedido ${barcodeOrder.orderNumber || barcodeOrder._id?.slice(-4)}` : 'null', 'canvas:', barcodeCanvasRef.current ? 'existe' : 'null');
     
     if (barcodeOrder && barcodeCanvasRef.current) {
       // Si el SVG ya está montado, generar inmediatamente
@@ -377,11 +377,12 @@ export default function AdminPanel() {
     
     if (barcodeReady && barcodeOrder && barcodeCanvasRef.current) {
       try {
-        console.log('Generando código de barras para pedido:', barcodeOrder._id);
+        const orderIdForBarcode = barcodeOrder.orderNumber?.toString() || barcodeOrder._id.toString();
+        console.log('Generando código de barras para pedido:', orderIdForBarcode);
         // Limpiar el SVG antes de generar uno nuevo
         barcodeCanvasRef.current.innerHTML = '';
-        // Generar código de barras con el ID del pedido
-        JsBarcode(barcodeCanvasRef.current, barcodeOrder._id, {
+        // Generar código de barras con el número del pedido
+        JsBarcode(barcodeCanvasRef.current, orderIdForBarcode, {
           format: 'CODE128',
           width: 0.8,
           height: 100,
@@ -591,7 +592,7 @@ export default function AdminPanel() {
                     <ul className="divide-y divide-gray-200">
                       {stats.recientes?.map((order) => (
                         <li key={order._id} className="py-2 flex flex-col sm:flex-row sm:items-center gap-2">
-                          <span className="font-mono text-xs">#{order._id.slice(-4)}</span>
+                          <span className="font-mono text-xs">#{order.orderNumber || order._id.slice(-4)}</span>
                           <span className="flex-1">
                             {order.user?.nombre || '-'} ({order.user?.email || '-'})
                           </span>
@@ -978,7 +979,7 @@ export default function AdminPanel() {
                         >
                           <td className="px-2 py-1.5 whitespace-nowrap">
                             <div className="font-mono text-xs font-bold text-blue-600">
-                              #{order._id.slice(-4)}
+                              #{order.orderNumber || order._id.slice(-4)}
                             </div>
                           </td>
                           <td className="px-2 py-1.5">
@@ -1063,7 +1064,7 @@ export default function AdminPanel() {
                     <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Detalles del Pedido #{selectedOrder._id.slice(-4)}
+                    Detalles del Pedido #{selectedOrder.orderNumber || selectedOrder._id.slice(-4)}
                   </h2>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
@@ -1089,7 +1090,7 @@ export default function AdminPanel() {
                         Información del Pedido
                       </h3>
                       <div className="space-y-2 text-sm">
-                        <div><b className="text-slate-700">ID:</b> <span className="font-mono text-blue-600 font-bold">#{selectedOrder._id.slice(-4)}</span></div>
+                        <div><b className="text-slate-700">ID:</b> <span className="font-mono text-blue-600 font-bold">#{selectedOrder.orderNumber || selectedOrder._id.slice(-4)}</span></div>
                         <div><b className="text-slate-700">Fecha:</b> <span className="text-slate-600">
                           {new Date(selectedOrder.createdAt).toLocaleString('es-AR', {
                             dateStyle: 'short',
@@ -1358,7 +1359,7 @@ export default function AdminPanel() {
                         <li key={order._id} className="py-3">
                           <div className="flex justify-between items-center">
                             <div>
-                              <span className="font-mono text-xs">#{order._id.slice(-4)}</span>
+                              <span className="font-mono text-xs">#{order.orderNumber || order._id.slice(-4)}</span>
                               <span className="ml-2 text-gray-700">
                                 {new Date(order.createdAt).toLocaleString('es-AR', {
                                   dateStyle: 'short',
@@ -1400,7 +1401,7 @@ export default function AdminPanel() {
         {barcodeOrder && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 overflow-y-auto" style={{ zIndex: 10000 }}>
             <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative my-8">
-              {console.log('Renderizando modal de código de barras para pedido:', barcodeOrder._id.slice(-4))}
+              {console.log('Renderizando modal de código de barras para pedido:', barcodeOrder.orderNumber || barcodeOrder._id.slice(-4))}
               <button
                 onClick={() => {
                   console.log('Cerrando modal de código de barras');
@@ -1415,7 +1416,7 @@ export default function AdminPanel() {
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                 </svg>
-                Código de Barras - Pedido #{barcodeOrder._id.slice(-4)}
+                Código de Barras - Pedido #{barcodeOrder.orderNumber || barcodeOrder._id.slice(-4)}
               </h2>
               
               {/* Área imprimible */}
@@ -1425,7 +1426,7 @@ export default function AdminPanel() {
                   <div className="flex justify-center">
                     <div className="transform rotate-180 origin-center">
                       <div className="text-2xl font-bold text-slate-800">
-                        Pedido #{barcodeOrder._id.slice(-4)}
+                        Pedido #{barcodeOrder.orderNumber || barcodeOrder._id.slice(-4)}
                       </div>
                     </div>
                   </div>
@@ -1441,7 +1442,7 @@ export default function AdminPanel() {
                   
                   {/* Código alfanumérico debajo del código de barras */}
                   <div className="text-lg font-mono text-slate-800 mb-6">
-                    {barcodeOrder._id.slice(-4)}
+                    {barcodeOrder.orderNumber || barcodeOrder._id.slice(-4)}
                   </div>
                   
                   {/* Información del cliente */}
