@@ -254,7 +254,7 @@ export default function AdminPanel() {
     setSavingStatus(true);
     setStatusError('');
     try {
-      const response = await fetch(API_ENDPOINTS.ORDER_BY_ID(selectedOrder._id), {
+      const response = await fetch(API_ENDPOINTS.ORDER_UPDATE_STATUS(selectedOrder._id), {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -270,7 +270,8 @@ export default function AdminPanel() {
         const data = await response.json();
         setStatusError(data.msg || 'Error al actualizar estado');
       }
-    } catch {
+    } catch (error) {
+      console.error('Error al actualizar estado:', error);
       setStatusError('Error al actualizar estado');
     }
     setSavingStatus(false);
