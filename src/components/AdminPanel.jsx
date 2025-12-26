@@ -1411,7 +1411,7 @@ export default function AdminPanel() {
               >
                 ×
               </button>
-              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+              <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2 print:hidden">
                 <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
                 </svg>
@@ -1419,55 +1419,63 @@ export default function AdminPanel() {
               </h2>
               
               {/* Área imprimible */}
-              <div id="barcode-print-area" className="bg-white border-2 border-gray-300 rounded-lg p-8 print:border-0 print:p-4">
-                    {/* Código de barras */}
-                    <div className="flex justify-center mb-6">
-                      <svg 
-                        ref={barcodeCanvasCallback} 
-                        className="barcode"
-                        style={{ minHeight: '100px' }}
-                      />
-                    </div>
-                    
-                    {/* Detalles del pedido - Rotados 180 grados */}
-                    <div className="flex justify-center">
-                      <div className="transform rotate-180 origin-center space-y-2 text-center">
-                        <div className="text-2xl font-bold text-slate-800">
-                          Pedido #{barcodeOrder._id.slice(-4)}
-                        </div>
-                        <div className="text-lg text-slate-700">
-                          Cliente: {barcodeOrder.user?.nombre || 'Usuario'}
-                        </div>
-                        <div className="text-base text-slate-600">
-                          {barcodeOrder.user?.email || ''}
-                        </div>
-                        <div className="text-base text-slate-600">
-                          Tel: {barcodeOrder.user?.telefono || '-'}
-                        </div>
-                        <div className="text-base text-slate-600 mt-2">
-                          Fecha: {new Date(barcodeOrder.createdAt).toLocaleDateString('es-AR')}
-                        </div>
-                        {barcodeOrder.description && (
-                          <div className="text-sm text-slate-600 mt-2 max-w-xs mx-auto">
-                            {barcodeOrder.description}
-                          </div>
-                        )}
-                        <div className="text-xl font-bold text-green-700 mt-4">
-                          Total: ${barcodeOrder.total.toLocaleString('es-AR')}
-                        </div>
-                        <div className="text-base text-slate-600 mt-2">
-                          Productos:
-                        </div>
-                        <div className="text-sm text-slate-600 space-y-1">
-                          {barcodeOrder.products.map((item, idx) => (
-                            <div key={idx}>
-                              {item.product?.name || '-'} x{item.quantity}
-                            </div>
-                          ))}
-                        </div>
+              <div id="barcode-print-area" className="bg-white border-2 border-gray-300 rounded-lg p-8 print:border-0 print:p-4 print:shadow-none">
+                <div className="text-center space-y-4">
+                  {/* Número de pedido - Solo este girado 180 grados */}
+                  <div className="flex justify-center">
+                    <div className="transform rotate-180 origin-center">
+                      <div className="text-2xl font-bold text-slate-800">
+                        Pedido #{barcodeOrder._id.slice(-4)}
                       </div>
                     </div>
                   </div>
+                  
+                  {/* Código de barras */}
+                  <div className="flex justify-center my-6">
+                    <svg 
+                      ref={barcodeCanvasCallback} 
+                      className="barcode"
+                      style={{ minHeight: '100px' }}
+                    />
+                  </div>
+                  
+                  {/* Código alfanumérico debajo del código de barras */}
+                  <div className="text-lg font-mono text-slate-800 mb-6">
+                    {barcodeOrder._id.slice(-4)}
+                  </div>
+                  
+                  {/* Información del cliente */}
+                  <div className="text-left space-y-2">
+                    <div className="text-base text-slate-700">
+                      Cliente: {barcodeOrder.user?.nombre || 'Usuario'}
+                    </div>
+                    
+                    {/* Fecha */}
+                    <div className="text-base text-slate-700">
+                      Fecha: {new Date(barcodeOrder.createdAt).toLocaleDateString('es-AR')}
+                    </div>
+                    
+                    {/* Importe */}
+                    <div className="text-lg font-bold text-slate-800 mt-4">
+                      Importe: ${barcodeOrder.total.toLocaleString('es-AR')}
+                    </div>
+                    
+                    {/* Lista de productos */}
+                    <div className="mt-4">
+                      <div className="text-base font-semibold text-slate-800 mb-2">
+                        Productos:
+                      </div>
+                      <div className="space-y-1 text-sm text-slate-700">
+                        {barcodeOrder.products.map((item, idx) => (
+                          <div key={idx} className="text-left">
+                            {item.product?.name || '-'} x{item.quantity}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
                   {/* Botones de acción */}
                   <div className="flex flex-col sm:flex-row gap-3 mt-6 print:hidden">
