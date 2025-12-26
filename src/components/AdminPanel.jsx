@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getImageUrl, API_ENDPOINTS, API_BASE_URL } from '../config/api';
+import JsBarcode from 'jsbarcode';
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -48,7 +49,7 @@ export default function AdminPanel() {
   const [savingStatus, setSavingStatus] = useState(false);
   const [statusError, setStatusError] = useState('');
   const [barcodeOrder, setBarcodeOrder] = useState(null);
-  const [barcodeCanvas, setBarcodeCanvas] = useState(null);
+  const barcodeCanvasRef = useRef(null);
 
   // Usuarios states
   const [users, setUsers] = useState([]);
@@ -334,10 +335,31 @@ export default function AdminPanel() {
   };
 
   const generateBarcode = (orderId) => {
-    // Esta función debería usar una librería de códigos de barras como jsbarcode
-    // Por ahora, solo establecemos el pedido seleccionado
-    setBarcodeOrder(orderId);
+    // Buscar el pedido completo en el array de orders
+    const order = orders.find(o => o._id === orderId);
+    if (order) {
+      setBarcodeOrder(order);
+    }
   };
+
+  // Generar código de barras cuando barcodeOrder cambie
+  useEffect(() => {
+    if (barcodeOrder && barcodeCanvasRef.current) {
+      try {
+        // Generar código de barras con el ID del pedido
+        JsBarcode(barcodeCanvasRef.current, barcodeOrder._id, {
+          format: 'CODE128',
+          width: 2,
+          height: 80,
+          displayValue: true,
+          fontSize: 16,
+          margin: 10
+        });
+      } catch (error) {
+        console.error('Error al generar código de barras:', error);
+      }
+    }
+  }, [barcodeOrder]);
 
   const exportToExcel = () => {
     // Implementación de exportación a Excel usando xlsx
@@ -1137,7 +1159,9 @@ export default function AdminPanel() {
                       )}
                     </button>
                     <button
-                      onClick={() => generateBarcode(selectedOrder._id)}
+                      onClick={() => {
+                        setBarcodeOrder(selectedOrder);
+                      }}
                       className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
                     >
                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1304,6 +1328,97 @@ export default function AdminPanel() {
                       ))}
                     </ul>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Modal de código de barras */}
+            {barcodeOrder && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-2xl w-full relative">
+                  <button
+                    onClick={() => setBarcodeOrder(null)}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+                  >
+                    ×
+                  </button>
+                  <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                    Código de Barras - Pedido #{barcodeOrder._id.slice(-4)}
+                  </h2>
+                  
+                  {/* Área imprimible */}
+                  <div id="barcode-print-area" className="bg-white border-2 border-gray-300 rounded-lg p-8 print:border-0 print:p-4">
+                    {/* Código de barras */}
+                    <div className="flex justify-center mb-6">
+                      <svg ref={barcodeCanvasRef} className="barcode" />
+                    </div>
+                    
+                    {/* Detalles del pedido - Rotados 180 grados */}
+                    <div className="flex justify-center">
+                      <div className="transform rotate-180 origin-center space-y-2 text-center">
+                        <div className="text-2xl font-bold text-slate-800">
+                          Pedido #{barcodeOrder._id.slice(-4)}
+                        </div>
+                        <div className="text-lg text-slate-700">
+                          Cliente: {barcodeOrder.user?.nombre || 'Usuario'}
+                        </div>
+                        <div className="text-base text-slate-600">
+                          {barcodeOrder.user?.email || ''}
+                        </div>
+                        <div className="text-base text-slate-600">
+                          Tel: {barcodeOrder.user?.telefono || '-'}
+                        </div>
+                        <div className="text-base text-slate-600 mt-2">
+                          Fecha: {new Date(barcodeOrder.createdAt).toLocaleDateString('es-AR')}
+                        </div>
+                        {barcodeOrder.description && (
+                          <div className="text-sm text-slate-600 mt-2 max-w-xs mx-auto">
+                            {barcodeOrder.description}
+                          </div>
+                        )}
+                        <div className="text-xl font-bold text-green-700 mt-4">
+                          Total: ${barcodeOrder.total.toLocaleString('es-AR')}
+                        </div>
+                        <div className="text-base text-slate-600 mt-2">
+                          Productos:
+                        </div>
+                        <div className="text-sm text-slate-600 space-y-1">
+                          {barcodeOrder.products.map((item, idx) => (
+                            <div key={idx}>
+                              {item.product?.name || '-'} x{item.quantity}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Botones de acción */}
+                  <div className="flex flex-col sm:flex-row gap-3 mt-6 print:hidden">
+                    <button
+                      onClick={() => {
+                        window.print();
+                      }}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
+                      </svg>
+                      Imprimir
+                    </button>
+                    <button
+                      onClick={() => setBarcodeOrder(null)}
+                      className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Cerrar
+                    </button>
+                  </div>
                 </div>
               </div>
             )}

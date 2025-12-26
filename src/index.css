@@ -1,5 +1,37 @@
 @import "tailwindcss";
 
+/* Estilos para impresión del código de barras */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  
+  #barcode-print-area,
+  #barcode-print-area * {
+    visibility: visible;
+  }
+  
+  #barcode-print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    page-break-after: always;
+  }
+  
+  .print\\:hidden {
+    display: none !important;
+  }
+  
+  .print\\:border-0 {
+    border: 0 !important;
+  }
+  
+  .print\\:p-4 {
+    padding: 1rem !important;
+  }
+}
+
 @keyframes fadeInScale {
   0% {
     opacity: 0;
