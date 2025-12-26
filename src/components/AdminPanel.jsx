@@ -344,19 +344,42 @@ export default function AdminPanel() {
 
   // Generar código de barras cuando barcodeOrder cambie
   useEffect(() => {
-    if (barcodeOrder && barcodeCanvasRef.current) {
-      try {
-        // Generar código de barras con el ID del pedido
-        JsBarcode(barcodeCanvasRef.current, barcodeOrder._id, {
-          format: 'CODE128',
-          width: 2,
-          height: 80,
-          displayValue: true,
-          fontSize: 16,
-          margin: 10
-        });
-      } catch (error) {
-        console.error('Error al generar código de barras:', error);
+    if (barcodeOrder) {
+      console.log('Generando código de barras para pedido:', barcodeOrder._id);
+      // Esperar a que el DOM se actualice antes de generar el código de barras
+      const timer = setTimeout(() => {
+        const canvas = barcodeCanvasRef.current;
+        if (canvas) {
+          try {
+            console.log('Canvas ref encontrado, generando código de barras...');
+            // Limpiar el SVG antes de generar uno nuevo
+            canvas.innerHTML = '';
+            // Generar código de barras con el ID del pedido
+            JsBarcode(canvas, barcodeOrder._id, {
+              format: 'CODE128',
+              width: 2,
+              height: 80,
+              displayValue: true,
+              fontSize: 16,
+              margin: 10,
+              background: '#ffffff',
+              lineColor: '#000000'
+            });
+            console.log('Código de barras generado exitosamente');
+          } catch (error) {
+            console.error('Error al generar código de barras:', error);
+            console.error('Error details:', error.message, error.stack);
+          }
+        } else {
+          console.error('Canvas ref no encontrado después de 200ms');
+        }
+      }, 200);
+      
+      return () => clearTimeout(timer);
+    } else {
+      // Limpiar el SVG cuando se cierra el modal
+      if (barcodeCanvasRef.current) {
+        barcodeCanvasRef.current.innerHTML = '';
       }
     }
   }, [barcodeOrder]);
@@ -1160,7 +1183,12 @@ export default function AdminPanel() {
                     </button>
                     <button
                       onClick={() => {
-                        setBarcodeOrder(selectedOrder);
+                        console.log('Botón de código de barras clickeado, pedido:', selectedOrder);
+                        if (selectedOrder) {
+                          setBarcodeOrder(selectedOrder);
+                        } else {
+                          console.error('selectedOrder es null');
+                        }
                       }}
                       className="flex-1 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 flex items-center justify-center gap-2"
                     >
@@ -1353,7 +1381,11 @@ export default function AdminPanel() {
                   <div id="barcode-print-area" className="bg-white border-2 border-gray-300 rounded-lg p-8 print:border-0 print:p-4">
                     {/* Código de barras */}
                     <div className="flex justify-center mb-6">
-                      <svg ref={barcodeCanvasRef} className="barcode" />
+                      <svg 
+                        ref={barcodeCanvasRef} 
+                        className="barcode"
+                        style={{ minHeight: '100px' }}
+                      />
                     </div>
                     
                     {/* Detalles del pedido - Rotados 180 grados */}
