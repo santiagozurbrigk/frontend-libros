@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCategory } from '../contexts/CategoryContext';
 import { useCart } from '../contexts/CartContext';
@@ -13,10 +13,12 @@ export default function Catalog() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalProducts, setTotalProducts] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const productsPerPage = 12;
+  const searchTimeoutRef = useRef(null);
 
   const selectedCategory = categoria || contextCategory;
   const categoryName = selectedCategory === 'escolares' ? 'Libros Escolares' : 'Libros de Inglés';
@@ -25,12 +27,37 @@ export default function Catalog() {
       ? 'Libros para estudiantes de primaria y secundaria'
       : 'Libros para aprender y practicar inglés';
 
+  // Debounce del término de búsqueda (espera 500ms después de que el usuario deje de escribir)
+  useEffect(() => {
+    if (searchTimeoutRef.current) {
+      clearTimeout(searchTimeoutRef.current);
+    }
+
+    searchTimeoutRef.current = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => {
+      if (searchTimeoutRef.current) {
+        clearTimeout(searchTimeoutRef.current);
+      }
+    };
+  }, [searchTerm]);
+
+  // Resetear a página 1 cuando cambia el término de búsqueda debounced
+  useEffect(() => {
+    if (currentPage !== 1 && debouncedSearchTerm) {
+      setCurrentPage(1);
+    }
+  }, [debouncedSearchTerm]);
+
   useEffect(() => {
     const fetchProducts = async () => {
       setLoading(true);
       setError('');
       try {
-        const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory, currentPage, productsPerPage));
+        // Incluir el término de búsqueda en la petición al backend
+        const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory, currentPage, productsPerPage, debouncedSearchTerm));
         if (!response.ok) throw new Error('Error al cargar productos');
         const data = await response.json();
         // El backend devuelve { products, total }
@@ -48,18 +75,7 @@ export default function Catalog() {
     if (selectedCategory) {
       fetchProducts();
     }
-  }, [selectedCategory, currentPage]);
-
-  // Resetear a página 1 cuando cambia el término de búsqueda
-  useEffect(() => {
-    if (currentPage !== 1) {
-      setCurrentPage(1);
-    }
-  }, [searchTerm]);
-
-  const filteredProducts = products.filter((product) =>
-    product.name.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  }, [selectedCategory, currentPage, debouncedSearchTerm]);
 
   const handlePageChange = (newPage) => {
     if (newPage >= 1 && newPage <= totalPages) {
@@ -214,7 +230,7 @@ export default function Catalog() {
           <div className="bg-red-50 border-2 border-red-200 rounded-xl p-6 text-red-700">
             <p className="font-medium">{error}</p>
           </div>
-        ) : filteredProducts.length === 0 ? (
+        ) : products.length === 0 ? (
           <div className="text-center py-20">
             <svg className="w-24 h-24 text-slate-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
@@ -228,13 +244,16 @@ export default function Catalog() {
             {/* Información de paginación */}
             {totalProducts > 0 && (
               <div className="mb-6 text-sm text-slate-600">
-                Mostrando {((currentPage - 1) * productsPerPage) + 1} - {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos
-                {searchTerm && ` (filtrados de ${totalProducts} total)`}
+                {debouncedSearchTerm ? (
+                  <>Mostrando {products.length} de {totalProducts} productos encontrados para "{debouncedSearchTerm}"</>
+                ) : (
+                  <>Mostrando {((currentPage - 1) * productsPerPage) + 1} - {Math.min(currentPage * productsPerPage, totalProducts)} de {totalProducts} productos</>
+                )}
               </div>
             )}
 
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-              {filteredProducts.map((product) => (
+              {products.map((product) => (
                 <div 
                   key={product._id} 
                   onClick={() => navigate(`/producto/${product._id}`)}
