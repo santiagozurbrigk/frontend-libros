@@ -3,9 +3,25 @@
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://backend-libros-ox7x.onrender.com';
 
 export const getImageUrl = (image) => {
-  if (!image) return '';
-  if (image.startsWith('http://') || image.startsWith('https://')) return image;
-  if (image.startsWith('/uploads/')) return `${API_BASE_URL}${image}`;
+  if (!image || image.trim() === '') return '';
+  
+  // Si ya es una URL completa (http/https), devolverla tal cual
+  if (image.startsWith('http://') || image.startsWith('https://')) {
+    return image;
+  }
+  
+  // Si es una ruta relativa que empieza con /uploads/, construir la URL completa
+  if (image.startsWith('/uploads/')) {
+    return `${API_BASE_URL}${image}`;
+  }
+  
+  // Si es una ruta relativa sin /uploads/, intentar construir la URL
+  if (image.startsWith('uploads/')) {
+    return `${API_BASE_URL}/${image}`;
+  }
+  
+  // Si no coincide con ningún patrón conocido, devolver la imagen tal cual
+  // (puede ser una URL de S3 u otro servicio)
   return image;
 };
 

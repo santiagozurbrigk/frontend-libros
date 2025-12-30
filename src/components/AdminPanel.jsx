@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { BarChart, Bar, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { getImageUrl, API_ENDPOINTS, API_BASE_URL } from '../config/api';
 import JsBarcode from 'jsbarcode';
+import * as XLSX from 'xlsx';
 
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState('dashboard');
@@ -411,9 +412,62 @@ export default function AdminPanel() {
   }, [barcodeOrder]);
 
   const exportToExcel = () => {
-    // Implementación de exportación a Excel usando xlsx
-    // Por ahora, solo mostramos un mensaje
-    alert('Función de exportación a Excel - requiere librería xlsx');
+    if (orders.length === 0) {
+      alert('No hay pedidos para exportar');
+      return;
+    }
+
+    try {
+      // Preparar los datos para Excel
+      const excelData = orders.map((order) => {
+        const productsList = order.products
+          .map((item) => `${item.product?.name || 'Producto desconocido'} x${item.quantity}`)
+          .join('; ');
+        
+        return {
+          'ID Pedido': order.orderNumber || order._id.slice(-4),
+          'Cliente': order.user?.nombre || 'Usuario desconocido',
+          'Email': order.user?.email || '-',
+          'Teléfono': order.user?.telefono || '-',
+          'Productos': productsList,
+          'Descripción': order.description || '-',
+          'Total': `$${order.total}`,
+          'Estado': order.status.charAt(0).toUpperCase() + order.status.slice(1),
+          'Fecha': new Date(order.createdAt).toLocaleString('es-AR'),
+        };
+      });
+
+      // Crear un libro de trabajo y una hoja
+      const ws = XLSX.utils.json_to_sheet(excelData);
+      
+      // Ajustar el ancho de las columnas
+      const colWidths = [
+        { wch: 12 }, // ID Pedido
+        { wch: 20 }, // Cliente
+        { wch: 25 }, // Email
+        { wch: 15 }, // Teléfono
+        { wch: 40 }, // Productos
+        { wch: 30 }, // Descripción
+        { wch: 12 }, // Total
+        { wch: 18 }, // Estado
+        { wch: 20 }, // Fecha
+      ];
+      ws['!cols'] = colWidths;
+
+      // Crear el libro de trabajo
+      const wb = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb, ws, 'Pedidos');
+
+      // Generar el nombre del archivo con la fecha actual
+      const fecha = new Date().toISOString().split('T')[0];
+      const fileName = `pedidos_${fecha}.xlsx`;
+
+      // Descargar el archivo
+      XLSX.writeFile(wb, fileName);
+    } catch (error) {
+      console.error('Error al exportar a Excel:', error);
+      alert('Error al exportar a Excel. Por favor, intenta nuevamente.');
+    }
   };
 
   return (

@@ -19,6 +19,7 @@ export default function Catalog() {
   const [totalPages, setTotalPages] = useState(0);
   const productsPerPage = 12;
   const searchTimeoutRef = useRef(null);
+  const [imageErrors, setImageErrors] = useState({});
 
   const selectedCategory = categoria || contextCategory;
   const categoryName = selectedCategory === 'escolares' ? 'Libros Escolares' : 'Libros de Inglés';
@@ -57,7 +58,9 @@ export default function Catalog() {
       setError('');
       try {
         // Incluir el término de búsqueda en la petición al backend
-        const response = await fetch(API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory, currentPage, productsPerPage, debouncedSearchTerm));
+        const url = API_ENDPOINTS.PRODUCTS_BY_CATEGORY(selectedCategory, currentPage, productsPerPage, debouncedSearchTerm);
+        console.log('Buscando productos con URL:', url); // Debug log
+        const response = await fetch(url);
         if (!response.ok) throw new Error('Error al cargar productos');
         const data = await response.json();
         // El backend devuelve { products, total }
@@ -260,13 +263,32 @@ export default function Catalog() {
                   className="group bg-white rounded-2xl shadow-md hover:shadow-2xl transition-all duration-300 overflow-hidden border-2 border-transparent hover:border-blue-200 cursor-pointer hover:-translate-y-2"
                 >
                   <div className="relative overflow-hidden bg-gradient-to-br from-slate-50 to-slate-100">
-                    {product.image && (
-                      <img
-                        src={getImageUrl(product.image)}
-                        alt={product.name}
-                        className="w-full h-56 object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                      />
-                    )}
+                    {(() => {
+                      const imageUrl = product.image ? getImageUrl(product.image) : '';
+                      const hasError = imageErrors[product._id];
+                      
+                      if (!imageUrl || hasError) {
+                        return (
+                          <div className="w-full h-56 flex items-center justify-center bg-gradient-to-br from-slate-100 to-slate-200">
+                            <svg className="w-16 h-16 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                        );
+                      }
+                      
+                      return (
+                        <img
+                          src={imageUrl}
+                          alt={product.name}
+                          className="w-full h-56 object-contain p-4 group-hover:scale-105 transition-transform duration-300"
+                          onError={() => {
+                            console.error('Error al cargar imagen del producto:', product.name, product.image);
+                            setImageErrors(prev => ({ ...prev, [product._id]: true }));
+                          }}
+                        />
+                      );
+                    })()}
                     <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1 text-xs font-semibold text-slate-600">
                       {product.pages} págs
                     </div>
