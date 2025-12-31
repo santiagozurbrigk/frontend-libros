@@ -3,34 +3,65 @@
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://backend-libros-ox7x.onrender.com';
 
 export const getImageUrl = (image) => {
-  if (!image || image.trim() === '') {
+  // Si la imagen está vacía o es null/undefined, retornar vacío
+  if (!image || (typeof image === 'string' && image.trim() === '')) {
+    if (process.env.NODE_ENV === 'development') {
+      console.warn('getImageUrl: imagen vacía o undefined');
+    }
     return '';
   }
   
+  // Convertir a string por si acaso
+  const imageStr = String(image).trim();
+  
   // Si ya es una URL completa (http/https), devolverla tal cual
-  if (image.startsWith('http://') || image.startsWith('https://')) {
-    return image;
+  if (imageStr.startsWith('http://') || imageStr.startsWith('https://')) {
+    return imageStr;
   }
   
   // Si es una ruta relativa que empieza con /uploads/, construir la URL completa
-  if (image.startsWith('/uploads/')) {
-    return `${API_BASE_URL}${image}`;
+  if (imageStr.startsWith('/uploads/')) {
+    const fullUrl = `${API_BASE_URL}${imageStr}`;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('getImageUrl: construyendo URL desde /uploads/', { original: imageStr, fullUrl });
+    }
+    return fullUrl;
   }
   
   // Si es una ruta relativa sin /uploads/, intentar construir la URL
-  if (image.startsWith('uploads/')) {
-    return `${API_BASE_URL}/${image}`;
+  if (imageStr.startsWith('uploads/')) {
+    const fullUrl = `${API_BASE_URL}/${imageStr}`;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('getImageUrl: construyendo URL desde uploads/', { original: imageStr, fullUrl });
+    }
+    return fullUrl;
   }
   
-  // Si no coincide con ningún patrón conocido, devolver la imagen tal cual
-  // (puede ser una URL de S3 u otro servicio, o una ruta relativa sin prefijo)
-  // En este caso, intentar construir la URL completa asumiendo que es relativa
-  if (image && !image.includes('://')) {
+  // Si no tiene protocolo y no empieza con uploads, intentar construir la URL completa
+  // Esto maneja casos donde la imagen puede estar guardada solo con el nombre del archivo
+  if (!imageStr.includes('://')) {
     // Si no tiene protocolo, asumir que es relativa y construir URL completa
-    return `${API_BASE_URL}/${image.startsWith('/') ? image.slice(1) : image}`;
+    // Normalizar: quitar / inicial si existe, luego agregar /uploads/ si no lo tiene
+    let normalizedPath = imageStr.startsWith('/') ? imageStr.slice(1) : imageStr;
+    
+    // Si no empieza con uploads/, agregarlo
+    if (!normalizedPath.startsWith('uploads/')) {
+      normalizedPath = `uploads/${normalizedPath}`;
+    }
+    
+    const fullUrl = `${API_BASE_URL}/${normalizedPath}`;
+    if (process.env.NODE_ENV === 'development') {
+      console.log('getImageUrl: normalizando y construyendo URL', { 
+        original: imageStr, 
+        normalized: normalizedPath, 
+        fullUrl 
+      });
+    }
+    return fullUrl;
   }
   
-  return image;
+  // Si tiene protocolo pero no es http/https, devolver tal cual (puede ser data: o blob:)
+  return imageStr;
 };
 
 export const API_ENDPOINTS = {

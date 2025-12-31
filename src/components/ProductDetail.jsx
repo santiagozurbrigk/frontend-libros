@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { getImageUrl, API_ENDPOINTS } from '../config/api';
+import { getImageUrl, API_ENDPOINTS, API_BASE_URL } from '../config/api';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -83,12 +83,14 @@ export default function ProductDetail() {
                     src={imageUrl}
                     alt={product.name}
                     className="w-full max-w-md h-auto object-contain rounded-lg"
-                    onError={() => {
+                    onError={(e) => {
                       console.error('Error al cargar imagen en ProductDetail:', {
                         productName: product.name,
                         productId: product._id,
-                        imageUrl: imageUrl,
-                        originalImage: product.image
+                        originalImage: product.image,
+                        constructedUrl: imageUrl,
+                        apiBaseUrl: API_BASE_URL,
+                        error: e
                       });
                       setImageError(true);
                     }}

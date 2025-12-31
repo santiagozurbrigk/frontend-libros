@@ -282,8 +282,15 @@ export default function Catalog() {
                           src={imageUrl}
                           alt={product.name}
                           className="w-full h-56 object-contain p-4 group-hover:scale-105 transition-transform duration-300"
-                          onError={() => {
-                            console.error('Error al cargar imagen del producto:', product.name, product.image);
+                          onError={(e) => {
+                            const imageUrl = getImageUrl(product.image);
+                            console.error('Error al cargar imagen del producto:', {
+                              productName: product.name,
+                              productId: product._id,
+                              originalImage: product.image,
+                              constructedUrl: imageUrl,
+                              error: e
+                            });
                             setImageErrors(prev => ({ ...prev, [product._id]: true }));
                           }}
                         />
