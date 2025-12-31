@@ -188,11 +188,18 @@ export default function AdminPanel() {
     e.preventDefault();
     setProductError('');
 
+    // Siempre usar FormData para poder enviar archivos
     const formData = new FormData();
     Object.keys(productForm).forEach((key) => {
-      if (key === 'image' && productForm[key] instanceof File) {
-        formData.append('image', productForm[key]);
-      } else if (key !== 'image') {
+      if (key === 'image') {
+        // Solo agregar la imagen si es un archivo nuevo (File object)
+        // Si es una string (URL), no la incluimos porque el backend mantendrá la imagen existente
+        if (productForm[key] instanceof File) {
+          formData.append('image', productForm[key]);
+        }
+        // Si es string (URL existente) y no hay archivo nuevo, no incluimos nada
+        // El backend mantendrá la imagen existente
+      } else {
         formData.append(key, productForm[key]);
       }
     });
@@ -203,10 +210,14 @@ export default function AdminPanel() {
         : API_ENDPOINTS.PRODUCTS;
       const method = editingProduct ? 'PUT' : 'POST';
 
+      // NO establecer Content-Type header cuando se usa FormData
+      // El navegador lo establecerá automáticamente con el boundary correcto
       const response = await fetch(url, {
         method,
-        headers: editingProduct ? { 'Content-Type': 'application/json' } : {},
-        body: editingProduct ? JSON.stringify(productForm) : formData
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: formData
       });
 
       if (response.ok) {
@@ -758,16 +769,25 @@ export default function AdminPanel() {
                     className="w-full border rounded-lg px-3 py-2"
                   />
                   <div className="flex gap-4 mt-2">
-                    {productImagePreview && (
-                      <img src={productImagePreview} alt="Preview" className="w-28 h-28 object-contain rounded border bg-white" />
-                    )}
-                    {!productImagePreview && productForm.image && (
-                      <img
-                        src={getImageUrl(productForm.image)}
-                        alt="Preview"
-                        className="w-28 h-28 object-contain rounded border bg-white"
-                      />
-                    )}
+                    {productImagePreview ? (
+                      <div>
+                        <p className="text-xs text-gray-600 mb-1">Nueva imagen:</p>
+                        <img src={productImagePreview} alt="Preview" className="w-28 h-28 object-contain rounded border bg-white" />
+                      </div>
+                    ) : editingProduct && editingProduct.image ? (
+                      <div>
+                        <p className="text-xs text-gray-600 mb-1">Imagen actual:</p>
+                        <img 
+                          src={getImageUrl(editingProduct.image)} 
+                          alt="Imagen actual" 
+                          className="w-28 h-28 object-contain rounded border bg-white"
+                          onError={(e) => {
+                            console.error('Error al cargar imagen existente:', editingProduct.image);
+                            e.target.style.display = 'none';
+                          }}
+                        />
+                      </div>
+                    ) : null}
                   </div>
                 </div>
               </div>
