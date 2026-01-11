@@ -68,6 +68,15 @@ export default function Login() {
       setLoading(true);
       setMessage('');
       try {
+        // Log para debugging (solo en desarrollo)
+        if (process.env.NODE_ENV === 'development') {
+          console.log('Enviando login:', {
+            email: formData.email,
+            passwordLength: formData.password?.length,
+            endpoint: API_ENDPOINTS.LOGIN
+          });
+        }
+        
         const response = await fetch(API_ENDPOINTS.LOGIN, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -104,7 +113,19 @@ export default function Login() {
           return;
         }
         
-        const data = await response.json();
+        // Leer la respuesta como texto primero para poder hacer logging
+        const responseText = await response.text();
+        let data;
+        try {
+          data = JSON.parse(responseText);
+        } catch (e) {
+          // Si no es JSON, usar el texto como mensaje
+          console.error('Error parsing response:', responseText);
+          setMessage('Error del servidor. Por favor intenta nuevamente.');
+          setLoading(false);
+          return;
+        }
+
         if (response.ok) {
           setMessage('¡Login exitoso!');
           login(data.token);
@@ -114,10 +135,26 @@ export default function Login() {
           } else {
             navigate('/seleccionar-categoria');
           }
-        } else if (data.msg?.includes('incorrectos')) {
-          setMessage('El email o la contraseña no son correctos. ¿Olvidaste tu contraseña?');
         } else {
-          setMessage(data.msg || 'Ocurrió un error inesperado. Intenta nuevamente o contacta soporte.');
+          // Log del error para debugging
+          console.error('Error de login:', {
+            status: response.status,
+            statusText: response.statusText,
+            data: data,
+            requestBody: formData
+          });
+          
+          // Mostrar el mensaje del backend o uno genérico
+          if (data.msg) {
+            setMessage(data.msg);
+          } else if (data.errors && Array.isArray(data.errors)) {
+            // Si hay errores de validación, mostrarlos
+            setMessage(data.errors.map(e => e.msg || e).join(', '));
+          } else if (response.status === 400) {
+            setMessage('El email o la contraseña no son correctos. ¿Olvidaste tu contraseña?');
+          } else {
+            setMessage('Ocurrió un error inesperado. Intenta nuevamente o contacta soporte.');
+          }
         }
       } catch (error) {
         setMessage('No se pudo conectar con el servidor. Verifica tu conexión a internet.');
