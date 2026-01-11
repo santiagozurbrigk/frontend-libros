@@ -590,7 +590,7 @@ export default function AdminPanel() {
       {/* Main Content */}
       <main className="flex-1 p-8 overflow-y-auto">
         {/* Dashboard */}
-        {activeSection === 'dashboard' && (
+        {!isEmpleado && activeSection === 'dashboard' && (
           <div>
             <h1 className="text-4xl font-bold mb-8 text-slate-800">Dashboard</h1>
             {loadingStats && <p className="text-gray-500">Cargando estadísticas...</p>}
