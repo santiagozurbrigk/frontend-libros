@@ -8,6 +8,10 @@ function decodeToken(token) {
     const decoded = JSON.parse(atob(token.split('.')[1]));
     if (decoded && decoded.user) {
       decoded.user.isAdmin = !!decoded.user.isAdmin;
+      // Si no hay role en el token, asignar según isAdmin (compatibilidad con tokens antiguos)
+      if (!decoded.user.role) {
+        decoded.user.role = decoded.user.isAdmin ? 'admin' : 'empleado';
+      }
     }
     return decoded;
   } catch {

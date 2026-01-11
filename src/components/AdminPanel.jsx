@@ -9,7 +9,20 @@ import * as XLSX from 'xlsx';
 export default function AdminPanel() {
   const [activeSection, setActiveSection] = useState('dashboard');
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, user } = useAuth();
+  
+  // Obtener el rol del usuario (empleado o admin)
+  const userRole = user?.role || (user?.isAdmin ? 'admin' : 'empleado');
+  
+  // Si es empleado, solo puede ver pedidos y usuarios
+  const isEmpleado = userRole === 'empleado';
+  
+  // Redirigir automáticamente a pedidos si es empleado y está en otra sección
+  useEffect(() => {
+    if (isEmpleado && activeSection !== 'pedidos' && activeSection !== 'usuarios') {
+      setActiveSection('pedidos');
+    }
+  }, [isEmpleado, activeSection]);
 
   // Dashboard states
   const [stats, setStats] = useState(null);
@@ -187,6 +200,12 @@ export default function AdminPanel() {
   const handleProductSubmit = async (e) => {
     e.preventDefault();
     setProductError('');
+
+    // Validar que se haya seleccionado una imagen al crear un producto nuevo
+    if (!editingProduct && !(productForm.image instanceof File)) {
+      setProductError('Por favor, selecciona una imagen para el producto');
+      return;
+    }
 
     // Siempre usar FormData para poder enviar archivos
     const formData = new FormData();
@@ -494,32 +513,36 @@ export default function AdminPanel() {
             <p className="text-xs text-slate-400">Panel de Administración</p>
           </div>
           <nav className="flex flex-col gap-2">
-            <button
-              onClick={() => setActiveSection('dashboard')}
-              className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
-                activeSection === 'dashboard' 
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
-                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-              </svg>
-              Dashboard
-            </button>
-            <button
-              onClick={() => setActiveSection('productos')}
-              className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
-                activeSection === 'productos' 
-                  ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
-                  : 'text-slate-300 hover:bg-slate-700 hover:text-white'
-              }`}
-            >
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
-              Productos
-            </button>
+            {!isEmpleado && (
+              <button
+                onClick={() => setActiveSection('dashboard')}
+                className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                  activeSection === 'dashboard' 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+              </button>
+            )}
+            {!isEmpleado && (
+              <button
+                onClick={() => setActiveSection('productos')}
+                className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
+                  activeSection === 'productos' 
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-500/30' 
+                    : 'text-slate-300 hover:bg-slate-700 hover:text-white'
+                }`}
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Productos
+              </button>
+            )}
             <button
               onClick={() => setActiveSection('pedidos')}
               className={`text-left px-4 py-3 rounded-xl transition-all duration-200 flex items-center gap-3 ${
@@ -695,7 +718,7 @@ export default function AdminPanel() {
         )}
 
         {/* Productos */}
-        {activeSection === 'productos' && (
+        {!isEmpleado && activeSection === 'productos' && (
           <div>
             <h1 className="text-4xl font-bold mb-8 text-slate-800">Gestión de Productos</h1>
             <form onSubmit={handleProductSubmit} className="bg-white rounded-2xl shadow-lg p-8 mb-10 max-w-2xl mx-auto border-2 border-slate-200">
