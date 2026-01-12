@@ -1280,55 +1280,59 @@ export default function AdminPanel() {
                     </div>
                   </div>
 
-                  <div className="border-t-2 border-gray-200 pt-6">
-                    <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                      <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                      </svg>
-                      Cambiar Estado del Pedido
-                    </h3>
-                    <div className="mb-4">
-                      <select
-                        value={orderStatus}
-                        onChange={(e) => setOrderStatus(e.target.value)}
-                        className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
-                      >
-                        <option value="pendiente">Pendiente</option>
-                        <option value="en proceso">En proceso</option>
-                        <option value="listo para retirar">Listo para retirar</option>
-                        <option value="entregado">Entregado</option>
-                      </select>
-                    </div>
-                    {statusError && (
-                      <div className="mb-4 bg-red-50 border-2 border-red-200 rounded-lg p-3 text-red-700 text-sm">
-                        {statusError}
+                  {!isEmpleado && (
+                    <div className="border-t-2 border-gray-200 pt-6">
+                      <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Cambiar Estado del Pedido
+                      </h3>
+                      <div className="mb-4">
+                        <select
+                          value={orderStatus}
+                          onChange={(e) => setOrderStatus(e.target.value)}
+                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                        >
+                          <option value="pendiente">Pendiente</option>
+                          <option value="en proceso">En proceso</option>
+                          <option value="listo para retirar">Listo para retirar</option>
+                          <option value="entregado">Entregado</option>
+                        </select>
                       </div>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row gap-3 mt-6">
-                    <button
-                      onClick={handleOrderStatusChange}
-                      disabled={savingStatus}
-                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {savingStatus ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Guardando...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                          </svg>
-                          Guardar Cambios de Estado
-                        </>
+                      {statusError && (
+                        <div className="mb-4 bg-red-50 border-2 border-red-200 rounded-lg p-3 text-red-700 text-sm">
+                          {statusError}
+                        </div>
                       )}
-                    </button>
+                    </div>
+                  )}
+
+                  <div className={`flex flex-col sm:flex-row gap-3 ${!isEmpleado ? 'mt-6' : 'mt-6 border-t-2 border-gray-200 pt-6'}`}>
+                    {!isEmpleado && (
+                      <button
+                        onClick={handleOrderStatusChange}
+                        disabled={savingStatus}
+                        className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {savingStatus ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Guardando...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                            </svg>
+                            Guardar Cambios de Estado
+                          </>
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         console.log('Botón de código de barras clickeado, pedido:', selectedOrder);
@@ -1354,32 +1358,34 @@ export default function AdminPanel() {
                       </svg>
                       Generar Código de Barras
                     </button>
-                    <button
-                      onClick={() => {
-                        if (confirm('¿Estás seguro de eliminar este pedido? Esta acción no se puede deshacer.')) {
-                          deleteOrder(selectedOrder._id, true);
-                        }
-                      }}
-                      disabled={deletingOrder[selectedOrder._id]}
-                      className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                    >
-                      {deletingOrder[selectedOrder._id] ? (
-                        <>
-                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                          </svg>
-                          Eliminando...
-                        </>
-                      ) : (
-                        <>
-                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                          </svg>
-                          Eliminar Pedido
-                        </>
-                      )}
-                    </button>
+                    {!isEmpleado && (
+                      <button
+                        onClick={() => {
+                          if (confirm('¿Estás seguro de eliminar este pedido? Esta acción no se puede deshacer.')) {
+                            deleteOrder(selectedOrder._id, true);
+                          }
+                        }}
+                        disabled={deletingOrder[selectedOrder._id]}
+                        className="flex-1 bg-gradient-to-r from-red-600 to-pink-600 hover:from-red-700 hover:to-pink-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                      >
+                        {deletingOrder[selectedOrder._id] ? (
+                          <>
+                            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                            Eliminando...
+                          </>
+                        ) : (
+                          <>
+                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                            </svg>
+                            Eliminar Pedido
+                          </>
+                        )}
+                      </button>
+                    )}
                     <button
                       onClick={() => {
                         setSelectedOrder(null);
