@@ -267,19 +267,15 @@ export default function Catalog() {
                       const imageUrl = product.image ? getImageUrl(product.image) : '';
                       const hasError = imageErrors[product._id];
                       
-                      // Debug logging
-                      if (!imageUrl) {
-                        console.warn('⚠️ Producto sin imagen:', {
-                          productName: product.name,
-                          productId: product._id,
-                          originalImage: product.image
-                        });
-                      } else {
-                        console.log('🖼️ Construyendo URL de imagen:', {
-                          productName: product.name,
-                          originalImage: product.image,
-                          constructedUrl: imageUrl
-                        });
+                      // Debug logging solo en desarrollo
+                      if (process.env.NODE_ENV === 'development') {
+                        if (!imageUrl) {
+                          console.warn('⚠️ Producto sin imagen:', {
+                            productName: product.name,
+                            productId: product._id,
+                            originalImage: product.image
+                          });
+                        }
                       }
                       
                       if (!imageUrl || hasError) {
@@ -298,22 +294,16 @@ export default function Catalog() {
                           alt={product.name}
                           className="w-full h-56 object-contain p-4 group-hover:scale-105 transition-transform duration-300"
                           onError={(e) => {
-                            const constructedUrl = getImageUrl(product.image);
-                            console.error('❌ Error al cargar imagen del producto:', {
-                              productName: product.name,
-                              productId: product._id,
-                              originalImage: product.image,
-                              constructedUrl: constructedUrl,
-                              imageElement: e.target,
-                              errorEvent: e
-                            });
+                            if (process.env.NODE_ENV === 'development') {
+                              const constructedUrl = getImageUrl(product.image);
+                              console.error('❌ Error al cargar imagen del producto:', {
+                                productName: product.name,
+                                productId: product._id,
+                                originalImage: product.image,
+                                constructedUrl: constructedUrl
+                              });
+                            }
                             setImageErrors(prev => ({ ...prev, [product._id]: true }));
-                          }}
-                          onLoad={() => {
-                            console.log('✅ Imagen cargada exitosamente:', {
-                              productName: product.name,
-                              imageUrl: imageUrl
-                            });
                           }}
                         />
                       );

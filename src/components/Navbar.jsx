@@ -43,7 +43,7 @@ export default function Navbar() {
               to="/cuenta"
               className="text-slate-700 hover:text-blue-600 font-medium transition-colors duration-200 px-3 py-2 rounded-lg hover:bg-blue-50"
             >
-              Mi Cuenta
+              Mis reservas
             </Link>
             <Link
               to="/carrito"
