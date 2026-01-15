@@ -124,7 +124,7 @@ export default function Navbar() {
               onClick={closeMenu}
               className="block text-slate-700 hover:text-blue-600 font-medium transition-colors duration-200 px-4 py-3 rounded-lg hover:bg-blue-50"
             >
-              Mi Cuenta
+              Mis reservas
             </Link>
             <button
               onClick={() => {
