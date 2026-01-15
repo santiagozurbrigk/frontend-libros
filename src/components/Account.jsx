@@ -30,18 +30,57 @@ export default function Account() {
       setLoading(true);
       setError('');
       try {
+        const token = localStorage.getItem('token');
+        if (!token) {
+          setError('No estás autenticado. Por favor, inicia sesión.');
+          setLoading(false);
+          return;
+        }
+
         const response = await fetch(API_ENDPOINTS.USER_ORDERS, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('token')}`
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
           }
         });
-        if (!response.ok) throw new Error('Error al obtener pedidos');
+
+        // Manejar diferentes códigos de estado
+        if (response.status === 401) {
+          // Token inválido o expirado
+          const errorData = await response.json().catch(() => ({ msg: 'Token inválido o expirado' }));
+          setError(errorData.msg || 'Tu sesión ha expirado. Por favor, inicia sesión nuevamente.');
+          // Opcional: limpiar token y redirigir al login
+          localStorage.removeItem('token');
+          return;
+        }
+
+        if (!response.ok) {
+          // Intentar obtener el mensaje de error del backend
+          let errorMessage = 'Error al obtener pedidos';
+          try {
+            const errorData = await response.json();
+            errorMessage = errorData.msg || errorData.message || errorMessage;
+          } catch {
+            // Si no se puede parsear el JSON, usar el mensaje por defecto
+            errorMessage = `Error ${response.status}: ${response.statusText}`;
+          }
+          throw new Error(errorMessage);
+        }
+
         const data = await response.json();
-        setOrders(data);
+        // Validar que data es un array
+        if (Array.isArray(data)) {
+          setOrders(data);
+        } else {
+          console.error('Respuesta inesperada del servidor:', data);
+          setOrders([]);
+        }
       } catch (err) {
-        setError(err.message || 'Error al obtener pedidos');
+        console.error('Error al obtener pedidos:', err);
+        setError(err.message || 'Error al obtener pedidos. Por favor, intenta nuevamente.');
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
 
     fetchOrders();
