@@ -53,7 +53,7 @@ export default function AdminPanel() {
   const [loadingOrders, setLoadingOrders] = useState(false);
   const [orderError, setOrderError] = useState('');
   const [orderSearch, setOrderSearch] = useState('');
-  const [ordersLimit, setOrdersLimit] = useState(25);
+  const [ordersLimit, setOrdersLimit] = useState(200);
   const [scannerActive, setScannerActive] = useState(false);
   const [scannerInput, setScannerInput] = useState('');
   const [scannerError, setScannerError] = useState('');
@@ -962,12 +962,10 @@ export default function AdminPanel() {
                   onChange={(e) => setOrdersLimit(Number(e.target.value))}
                   className="border rounded-lg px-4 py-2 text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
-                  <option value={25}>Últimos 25 pedidos</option>
-                  <option value={50}>Últimos 50 pedidos</option>
-                  <option value={100}>Últimos 100 pedidos</option>
                   <option value={200}>Últimos 200 pedidos</option>
                   <option value={500}>Últimos 500 pedidos</option>
                   <option value={1000}>Últimos 1000 pedidos</option>
+                  <option value={5000}>Últimos 5000 pedidos</option>
                 </select>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
