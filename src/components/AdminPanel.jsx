@@ -66,6 +66,10 @@ export default function AdminPanel() {
   const [barcodeOrder, setBarcodeOrder] = useState(null);
   const barcodeCanvasRef = useRef(null);
   const [barcodeReady, setBarcodeReady] = useState(false);
+  const [selectedOrderIds, setSelectedOrderIds] = useState([]);
+  const [bulkStatusModalOpen, setBulkStatusModalOpen] = useState(false);
+  const [bulkStatus, setBulkStatus] = useState('');
+  const [updatingBulkStatus, setUpdatingBulkStatus] = useState(false);
 
   // Debug: Log cuando barcodeOrder cambia
   useEffect(() => {
@@ -333,9 +337,71 @@ export default function AdminPanel() {
           setSelectedOrder(null);
           setOrderStatus('');
         }
+        // Remover de seleccionados si estaba seleccionado
+        setSelectedOrderIds((prev) => prev.filter(id => id !== orderId));
       }
     } catch {}
     setDeletingOrder((prev) => ({ ...prev, [orderId]: false }));
+  };
+
+  // Funciones para selección múltiple
+  const toggleOrderSelection = (orderId) => {
+    setSelectedOrderIds((prev) => {
+      if (prev.includes(orderId)) {
+        return prev.filter(id => id !== orderId);
+      } else {
+        return [...prev, orderId];
+      }
+    });
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedOrderIds.length === orders.length) {
+      setSelectedOrderIds([]);
+    } else {
+      setSelectedOrderIds(orders.map(order => order._id));
+    }
+  };
+
+  const handleBulkStatusChange = async () => {
+    if (selectedOrderIds.length === 0 || !bulkStatus) {
+      alert('Por favor selecciona al menos un pedido y un estado');
+      return;
+    }
+
+    setUpdatingBulkStatus(true);
+    setStatusError('');
+    
+    try {
+      const response = await fetch(API_ENDPOINTS.ORDER_BULK_UPDATE_STATUS, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          orderIds: selectedOrderIds,
+          status: bulkStatus
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.msg || `Se actualizaron ${selectedOrderIds.length} pedidos`);
+        loadOrders();
+        setSelectedOrderIds([]);
+        setBulkStatusModalOpen(false);
+        setBulkStatus('');
+      } else {
+        const errorData = await response.json();
+        setStatusError(errorData.msg || 'Error al actualizar los pedidos');
+      }
+    } catch (error) {
+      console.error('Error al actualizar múltiples pedidos:', error);
+      setStatusError('Error al actualizar los pedidos');
+    } finally {
+      setUpdatingBulkStatus(false);
+    }
   };
 
   const viewUserOrders = async (user) => {
@@ -1043,7 +1109,7 @@ export default function AdminPanel() {
                   )}
                 </div>
               </div>
-              <div className="mt-4">
+              <div className="mt-4 flex flex-wrap items-center gap-4">
                 <button
                   onClick={exportToExcel}
                   disabled={orders.length === 0 || loadingOrders}
@@ -1051,10 +1117,22 @@ export default function AdminPanel() {
                 >
                   Exportar a Excel
                 </button>
-                <span className="ml-3 text-sm text-gray-600">
+                {!isEmpleado && selectedOrderIds.length > 0 && (
+                  <button
+                    onClick={() => setBulkStatusModalOpen(true)}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg transition text-lg font-semibold flex items-center gap-2"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Cambiar estado ({selectedOrderIds.length})
+                  </button>
+                )}
+                <span className="text-sm text-gray-600">
                   {orders.length > 0
-                    ? `${orders.length} pedido${orders.length !== 1 ? 's' : ''} disponibles para exportar`
-                    : 'No hay pedidos para exportar'}
+                    ? `${orders.length} pedido${orders.length !== 1 ? 's' : ''} disponibles`
+                    : 'No hay pedidos'}
+                  {selectedOrderIds.length > 0 && ` | ${selectedOrderIds.length} seleccionado${selectedOrderIds.length !== 1 ? 's' : ''}`}
                 </span>
               </div>
             </div>
@@ -1079,6 +1157,16 @@ export default function AdminPanel() {
                   <table className="w-full text-sm" style={{ minWidth: '800px' }}>
                     <thead>
                       <tr className="bg-gray-100 text-gray-700 uppercase text-xs">
+                        {!isEmpleado && (
+                          <th className="px-2 py-1.5 text-left whitespace-nowrap">
+                            <input
+                              type="checkbox"
+                              checked={orders.length > 0 && selectedOrderIds.length === orders.length}
+                              onChange={toggleSelectAll}
+                              className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                            />
+                          </th>
+                        )}
                         <th className="px-2 py-1.5 text-left whitespace-nowrap">ID Pedido</th>
                         <th className="px-2 py-1.5 text-left whitespace-nowrap">Cliente</th>
                         <th className="px-2 py-1.5 text-left whitespace-nowrap max-w-[150px]">Contacto</th>
@@ -1095,8 +1183,18 @@ export default function AdminPanel() {
                         <tr
                           key={order._id}
                           id={`order-${order._id}`}
-                          className="border-b hover:bg-gray-50 transition"
+                          className={`border-b hover:bg-gray-50 transition ${selectedOrderIds.includes(order._id) ? 'bg-blue-50' : ''}`}
                         >
+                          {!isEmpleado && (
+                            <td className="px-2 py-1.5 whitespace-nowrap">
+                              <input
+                                type="checkbox"
+                                checked={selectedOrderIds.includes(order._id)}
+                                onChange={() => toggleOrderSelection(order._id)}
+                                className="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500"
+                              />
+                            </td>
+                          )}
                           <td className="px-2 py-1.5 whitespace-nowrap">
                             <div className="font-mono text-xs font-bold text-blue-600">
                               #{order.orderNumber || order._id.slice(-4)}
@@ -1395,6 +1493,81 @@ export default function AdminPanel() {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                       </svg>
                       Cerrar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal para cambiar estado de múltiples pedidos */}
+            {bulkStatusModalOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-md w-full">
+                  <h2 className="text-2xl font-bold mb-4 text-slate-800 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    Cambiar Estado de {selectedOrderIds.length} Pedido{selectedOrderIds.length !== 1 ? 's' : ''}
+                  </h2>
+                  
+                  <div className="mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Nuevo Estado:
+                    </label>
+                    <select
+                      value={bulkStatus}
+                      onChange={(e) => setBulkStatus(e.target.value)}
+                      className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                    >
+                      <option value="">Selecciona un estado</option>
+                      <option value="pendiente">Pendiente</option>
+                      <option value="en proceso">En proceso</option>
+                      <option value="listo para retirar">Listo para retirar</option>
+                      <option value="entregado">Entregado</option>
+                    </select>
+                  </div>
+
+                  {statusError && (
+                    <div className="mb-4 bg-red-50 border-2 border-red-200 rounded-lg p-3 text-red-700 text-sm">
+                      {statusError}
+                    </div>
+                  )}
+
+                  <div className="flex gap-3">
+                    <button
+                      onClick={handleBulkStatusChange}
+                      disabled={updatingBulkStatus || !bulkStatus}
+                      className="flex-1 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                    >
+                      {updatingBulkStatus ? (
+                        <>
+                          <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                          Actualizando...
+                        </>
+                      ) : (
+                        <>
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          Confirmar
+                        </>
+                      )}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setBulkStatusModalOpen(false);
+                        setBulkStatus('');
+                        setStatusError('');
+                      }}
+                      className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                    >
+                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                      Cancelar
                     </button>
                   </div>
                 </div>

@@ -90,6 +90,7 @@ export const API_ENDPOINTS = {
   USER_ORDERS: `${API_BASE_URL}/api/pedidos/mis-pedidos`,
   ORDER_BY_ID: (id) => `${API_BASE_URL}/api/pedidos/${id}`,
   ORDER_UPDATE_STATUS: (id) => `${API_BASE_URL}/api/pedidos/${id}/status`, // Actualizar estado del pedido
+  ORDER_BULK_UPDATE_STATUS: `${API_BASE_URL}/api/pedidos/bulk/status`, // Actualizar estado de múltiples pedidos
   ORDER_STATS: `${API_BASE_URL}/api/pedidos/estadisticas`,
   MONTHLY_SALES: `${API_BASE_URL}/api/pedidos/dashboard/ventas-mes`,
   TOP_PRODUCTS: `${API_BASE_URL}/api/pedidos/dashboard/top-productos`,
