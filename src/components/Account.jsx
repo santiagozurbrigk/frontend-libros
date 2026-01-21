@@ -23,7 +23,7 @@ export default function Account() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [expandedOrder, setExpandedOrder] = useState(null);
+  const [expandedOrder, setExpandedOrder] = useState(null); // Almacenará el _id del pedido expandido
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -70,6 +70,16 @@ export default function Account() {
         const data = await response.json();
         // Validar que data es un array
         if (Array.isArray(data)) {
+          console.log('Pedidos recibidos:', data.length);
+          // Log para debugging: verificar estructura de productos
+          if (data.length > 0) {
+            console.log('Ejemplo de pedido:', {
+              _id: data[0]._id,
+              orderNumber: data[0].orderNumber,
+              productsCount: data[0].products?.length,
+              firstProduct: data[0].products?.[0]
+            });
+          }
           setOrders(data);
         } else {
           console.error('Respuesta inesperada del servidor:', data);
@@ -170,9 +180,9 @@ export default function Account() {
                       </p>
                       <button
                         className="text-blue-600 hover:text-blue-700 font-medium transition-colors duration-200 flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-blue-50"
-                        onClick={() => setExpandedOrder(expandedOrder === index ? null : index)}
+                        onClick={() => setExpandedOrder(expandedOrder === order._id ? null : order._id)}
                       >
-                        {expandedOrder === index ? (
+                        {expandedOrder === order._id ? (
                           <>
                             <span>Ocultar</span>
                             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -190,31 +200,42 @@ export default function Account() {
                       </button>
                     </div>
                   </div>
-                  {expandedOrder === index && (
+                  {expandedOrder === order._id && (
                     <div className="bg-white p-6 border-t-2 border-slate-200">
                       <h3 className="font-semibold mb-4 text-slate-800">Productos:</h3>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {order.products.map((item) => (
-                          <div key={item.product._id} className="flex items-center gap-3 bg-slate-50 rounded-xl p-4">
-                            {item.product.image && (
-                              <img
-                                src={getImageUrl(item.product.image)}
-                                alt={item.product.name}
-                                className="w-16 h-20 object-contain rounded-lg bg-white p-2"
-                              />
-                            )}
-                            <div className="flex-1">
-                              <div className="font-semibold text-slate-800 mb-1">{item.product.name}</div>
-                              <div className="text-sm text-slate-600 mb-1">
-                                Cantidad: {item.quantity}
+                      {order.products && order.products.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          {order.products
+                            .filter((item) => item.product && item.product._id) // Filtrar productos eliminados
+                            .map((item) => (
+                              <div key={item.product._id || item.product} className="flex items-center gap-3 bg-slate-50 rounded-xl p-4">
+                                {item.product.image && (
+                                  <img
+                                    src={getImageUrl(item.product.image)}
+                                    alt={item.product.name || 'Producto'}
+                                    className="w-16 h-20 object-contain rounded-lg bg-white p-2"
+                                    onError={(e) => {
+                                      e.target.style.display = 'none';
+                                    }}
+                                  />
+                                )}
+                                <div className="flex-1">
+                                  <div className="font-semibold text-slate-800 mb-1">
+                                    {item.product.name || 'Producto eliminado'}
+                                  </div>
+                                  <div className="text-sm text-slate-600 mb-1">
+                                    Cantidad: {item.quantity}
+                                  </div>
+                                  <div className="text-emerald-600 font-bold">
+                                    ${item.product.price || 0}
+                                  </div>
+                                </div>
                               </div>
-                              <div className="text-emerald-600 font-bold">
-                                ${item.product.price}
-                              </div>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <p className="text-slate-600 text-center py-4">No hay productos en este pedido.</p>
+                      )}
                     </div>
                   )}
                 </div>
