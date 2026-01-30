@@ -70,6 +70,15 @@ export default function AdminPanel() {
   const [bulkStatusModalOpen, setBulkStatusModalOpen] = useState(false);
   const [bulkStatus, setBulkStatus] = useState('');
   const [updatingBulkStatus, setUpdatingBulkStatus] = useState(false);
+  
+  // Estados para el modal de escaneo masivo
+  const [bulkScannerModalOpen, setBulkScannerModalOpen] = useState(false);
+  const [scannedOrders, setScannedOrders] = useState([]);
+  const [bulkScannerInput, setBulkScannerInput] = useState('');
+  const [bulkScannerError, setBulkScannerError] = useState('');
+  const [bulkScannerStatus, setBulkScannerStatus] = useState('');
+  const [updatingBulkScannerStatus, setUpdatingBulkScannerStatus] = useState(false);
+  const bulkScannerInputRef = useRef(null);
 
   // Debug: Log cuando barcodeOrder cambia
   useEffect(() => {
@@ -437,6 +446,122 @@ export default function AdminPanel() {
       }
     }
   };
+
+  // Funciones para el modal de escaneo masivo
+  const handleBulkScannerKeyPress = async (e) => {
+    if (e.key === 'Enter') {
+      const scannedId = bulkScannerInput.trim();
+      if (scannedId) {
+        // Buscar el pedido en la lista actual de pedidos
+        let order = orders.find((o) => 
+          o.orderNumber?.toString() === scannedId || 
+          o.orderNumber?.toString().includes(scannedId) ||
+          o._id.toString().includes(scannedId)
+        );
+
+        // Si no se encuentra en la lista actual, intentar buscarlo en el servidor
+        if (!order) {
+          try {
+            const response = await fetch(`${API_ENDPOINTS.ORDERS}?search=${encodeURIComponent(scannedId)}&limit=1`);
+            const data = await response.json();
+            if (Array.isArray(data) && data.length > 0) {
+              order = data[0];
+            }
+          } catch (error) {
+            console.error('Error al buscar pedido:', error);
+          }
+        }
+
+        if (order) {
+          // Verificar si el pedido ya está en la lista
+          if (!scannedOrders.find(o => o._id === order._id)) {
+            setScannedOrders(prev => [...prev, order]);
+            setBulkScannerError('');
+          } else {
+            setBulkScannerError(`Pedido #${order.orderNumber || order._id.slice(-4)} ya está en la lista`);
+            setTimeout(() => setBulkScannerError(''), 2000);
+          }
+          setBulkScannerInput('');
+          // Enfocar el input nuevamente para el siguiente escaneo
+          setTimeout(() => {
+            if (bulkScannerInputRef.current) {
+              bulkScannerInputRef.current.focus();
+            }
+          }, 100);
+        } else {
+          setBulkScannerError(`Pedido no encontrado: ${scannedId}`);
+          setTimeout(() => {
+            setBulkScannerError('');
+            setBulkScannerInput('');
+            if (bulkScannerInputRef.current) {
+              bulkScannerInputRef.current.focus();
+            }
+          }, 1500);
+        }
+      }
+    }
+  };
+
+  const removeScannedOrder = (orderId) => {
+    setScannedOrders(prev => prev.filter(o => o._id !== orderId));
+  };
+
+  const clearScannedOrders = () => {
+    setScannedOrders([]);
+    setBulkScannerInput('');
+    setBulkScannerError('');
+    setBulkScannerStatus('');
+  };
+
+  const handleBulkScannerStatusChange = async () => {
+    if (scannedOrders.length === 0 || !bulkScannerStatus) {
+      alert('Por favor escanea al menos un pedido y selecciona un estado');
+      return;
+    }
+
+    setUpdatingBulkScannerStatus(true);
+    setBulkScannerError('');
+    
+    try {
+      const orderIds = scannedOrders.map(o => o._id);
+      const response = await fetch(API_ENDPOINTS.ORDER_BULK_UPDATE_STATUS, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          orderIds: orderIds,
+          status: bulkScannerStatus
+        })
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        alert(data.msg || `Se actualizaron ${scannedOrders.length} pedidos`);
+        loadOrders();
+        clearScannedOrders();
+        setBulkScannerModalOpen(false);
+      } else {
+        const errorData = await response.json();
+        setBulkScannerError(errorData.msg || 'Error al actualizar los pedidos');
+      }
+    } catch (error) {
+      console.error('Error al actualizar múltiples pedidos:', error);
+      setBulkScannerError('Error al actualizar los pedidos');
+    } finally {
+      setUpdatingBulkScannerStatus(false);
+    }
+  };
+
+  // Efecto para enfocar el input cuando se abre el modal
+  useEffect(() => {
+    if (bulkScannerModalOpen && bulkScannerInputRef.current) {
+      setTimeout(() => {
+        bulkScannerInputRef.current?.focus();
+      }, 100);
+    }
+  }, [bulkScannerModalOpen]);
 
   const generateBarcode = (orderId) => {
     // Buscar el pedido completo en el array de orders
@@ -1117,6 +1242,18 @@ export default function AdminPanel() {
                 >
                   Exportar a Excel
                 </button>
+                <button
+                  onClick={() => {
+                    setBulkScannerModalOpen(true);
+                    clearScannedOrders();
+                  }}
+                  className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-2 rounded-lg transition text-lg font-semibold flex items-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                  </svg>
+                  Escanear Múltiples Pedidos
+                </button>
                 {!isEmpleado && selectedOrderIds.length > 0 && (
                   <button
                     onClick={() => setBulkStatusModalOpen(true)}
@@ -1495,6 +1632,196 @@ export default function AdminPanel() {
                       Cerrar
                     </button>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Modal de escaneo masivo */}
+            {bulkScannerModalOpen && (
+              <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 overflow-y-auto">
+                <div className="bg-white rounded-xl shadow-2xl p-6 max-w-4xl w-full relative my-8">
+                  <button
+                    onClick={() => {
+                      setBulkScannerModalOpen(false);
+                      clearScannedOrders();
+                    }}
+                    className="absolute top-4 right-4 text-gray-500 hover:text-gray-700 text-2xl font-bold w-8 h-8 flex items-center justify-center rounded-full hover:bg-gray-100 transition"
+                  >
+                    ×
+                  </button>
+                  <h2 className="text-2xl font-bold mb-6 text-slate-800 flex items-center gap-2">
+                    <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                    </svg>
+                    Escaneo Masivo de Pedidos
+                  </h2>
+
+                  {/* Input de escaneo */}
+                  <div className="mb-6 p-4 bg-purple-50 border-2 border-purple-200 rounded-lg">
+                    <label className="block text-sm font-medium text-purple-800 mb-2">
+                      Escanear código de barras (se activa automáticamente):
+                    </label>
+                    <input
+                      ref={bulkScannerInputRef}
+                      type="text"
+                      placeholder="Escanee el código de barras del pedido..."
+                      value={bulkScannerInput}
+                      onChange={(e) => setBulkScannerInput(e.target.value)}
+                      onKeyPress={handleBulkScannerKeyPress}
+                      className="w-full border-2 border-purple-300 rounded-lg px-4 py-3 text-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                      autoFocus
+                    />
+                    {bulkScannerError && (
+                      <div className="mt-2 text-red-600 text-sm font-medium">{bulkScannerError}</div>
+                    )}
+                    <div className="mt-2 text-xs text-purple-600">
+                      💡 <strong>Consejo:</strong> Escanee múltiples pedidos seguidos. Cada pedido se agregará automáticamente a la lista.
+                    </div>
+                  </div>
+
+                  {/* Lista de pedidos escaneados */}
+                  <div className="mb-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h3 className="text-lg font-semibold text-slate-800">
+                        Pedidos Escaneados ({scannedOrders.length})
+                      </h3>
+                      {scannedOrders.length > 0 && (
+                        <button
+                          onClick={clearScannedOrders}
+                          className="text-sm text-red-600 hover:text-red-800 font-semibold"
+                        >
+                          Limpiar lista
+                        </button>
+                      )}
+                    </div>
+                    {scannedOrders.length === 0 ? (
+                      <div className="text-center py-8 text-gray-500 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                        <svg className="w-12 h-12 mx-auto mb-2 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+                        </svg>
+                        <p>No hay pedidos escaneados aún. Escanee códigos de barras para comenzar.</p>
+                      </div>
+                    ) : (
+                      <div className="max-h-96 overflow-y-auto border-2 border-gray-200 rounded-lg">
+                        <table className="w-full text-sm">
+                          <thead className="bg-gray-100 sticky top-0">
+                            <tr>
+                              <th className="px-4 py-2 text-left">ID Pedido</th>
+                              <th className="px-4 py-2 text-left">Cliente</th>
+                              <th className="px-4 py-2 text-left">Estado Actual</th>
+                              <th className="px-4 py-2 text-left">Total</th>
+                              <th className="px-4 py-2 text-left">Acción</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {scannedOrders.map((order) => (
+                              <tr key={order._id} className="border-b hover:bg-gray-50">
+                                <td className="px-4 py-2 font-mono font-bold text-blue-600">
+                                  #{order.orderNumber || order._id.slice(-4)}
+                                </td>
+                                <td className="px-4 py-2">
+                                  <div className="font-semibold">{order.user?.nombre || 'Usuario'}</div>
+                                  <div className="text-xs text-gray-500">{order.user?.email || '-'}</div>
+                                </td>
+                                <td className="px-4 py-2">
+                                  <span
+                                    className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                                      order.status === 'pendiente'
+                                        ? 'bg-yellow-100 text-yellow-800'
+                                        : order.status === 'en proceso'
+                                        ? 'bg-blue-100 text-blue-800'
+                                        : order.status === 'listo para retirar'
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-gray-100 text-gray-800'
+                                    }`}
+                                  >
+                                    {order.status}
+                                  </span>
+                                </td>
+                                <td className="px-4 py-2 font-bold text-green-700">
+                                  ${order.total.toLocaleString('es-AR')}
+                                </td>
+                                <td className="px-4 py-2">
+                                  <button
+                                    onClick={() => removeScannedOrder(order._id)}
+                                    className="text-red-600 hover:text-red-800 font-semibold text-sm"
+                                  >
+                                    Eliminar
+                                  </button>
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Selector de estado y botones */}
+                  {scannedOrders.length > 0 && (
+                    <div className="border-t-2 border-gray-200 pt-6">
+                      <h3 className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
+                        <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Cambiar Estado de {scannedOrders.length} Pedido{scannedOrders.length !== 1 ? 's' : ''}
+                      </h3>
+                      <div className="mb-4">
+                        <select
+                          value={bulkScannerStatus}
+                          onChange={(e) => setBulkScannerStatus(e.target.value)}
+                          className="w-full border-2 border-gray-300 rounded-lg px-4 py-3 text-base focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition"
+                        >
+                          <option value="">Selecciona un estado</option>
+                          <option value="pendiente">Pendiente</option>
+                          <option value="en proceso">En proceso</option>
+                          <option value="listo para retirar">Listo para retirar</option>
+                          <option value="entregado">Entregado</option>
+                        </select>
+                      </div>
+                      {bulkScannerError && (
+                        <div className="mb-4 bg-red-50 border-2 border-red-200 rounded-lg p-3 text-red-700 text-sm">
+                          {bulkScannerError}
+                        </div>
+                      )}
+                      <div className="flex gap-3">
+                        <button
+                          onClick={handleBulkScannerStatusChange}
+                          disabled={updatingBulkScannerStatus || !bulkScannerStatus}
+                          className="flex-1 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold shadow-lg hover:shadow-xl transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                        >
+                          {updatingBulkScannerStatus ? (
+                            <>
+                              <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                              </svg>
+                              Actualizando...
+                            </>
+                          ) : (
+                            <>
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                              </svg>
+                              Cambiar Estado de Todos
+                            </>
+                          )}
+                        </button>
+                        <button
+                          onClick={() => {
+                            setBulkScannerModalOpen(false);
+                            clearScannedOrders();
+                          }}
+                          className="flex-1 bg-gray-300 hover:bg-gray-400 text-gray-800 px-6 py-3 rounded-lg font-semibold shadow-md hover:shadow-lg transition-all duration-200 flex items-center justify-center gap-2"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Cerrar
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
