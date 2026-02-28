@@ -21,6 +21,13 @@ export default function CategorySelector({ onCategorySelect }) {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="max-w-5xl w-full">
+        {/* Aviso de demora */}
+        <div className="mb-6 text-center">
+          <div className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg border-2 border-red-700">
+            <p className="text-lg md:text-xl font-bold">ATENCIÓN DEMORA APROX DE 6 A 8 DÍAS</p>
+          </div>
+        </div>
+        
         <div className="text-center mb-12">
           <h1 className="text-4xl md:text-5xl font-bold text-slate-800 mb-4">Bienvenido a Libreria Low Cost</h1>
           <p className="text-lg text-slate-600">Selecciona la categoría que te interesa</p>
