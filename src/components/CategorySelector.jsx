@@ -24,7 +24,7 @@ export default function CategorySelector({ onCategorySelect }) {
         {/* Aviso de demora */}
         <div className="mb-6 text-center">
           <div className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg border-2 border-red-700">
-            <p className="text-lg md:text-xl font-bold">ATENCIÓN DEMORA APROX DE 6 A 8 DÍAS</p>
+            <p className="text-lg md:text-xl font-bold">ATENCIÓN DEMORA APROX DE 4 A 6 DÍAS</p>
           </div>
         </div>
         
