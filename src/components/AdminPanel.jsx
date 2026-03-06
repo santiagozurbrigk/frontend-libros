@@ -266,10 +266,25 @@ export default function AdminPanel() {
         setEditingProduct(null);
       } else {
         const data = await response.json();
-        setProductError(data.msg || 'Error al guardar producto');
+        console.error('Error al guardar producto:', {
+          status: response.status,
+          statusText: response.statusText,
+          data: data
+        });
+        
+        // Mostrar mensaje de error más detallado
+        if (data.details && Array.isArray(data.details)) {
+          const errorMessages = data.details.map(err => `${err.field}: ${err.message}`).join(', ');
+          setProductError(`Error de validación: ${errorMessages}`);
+        } else if (data.error) {
+          setProductError(data.error);
+        } else {
+          setProductError(data.msg || 'Error al guardar producto');
+        }
       }
-    } catch {
-      setProductError('Error al guardar producto');
+    } catch (error) {
+      console.error('Error al guardar producto:', error);
+      setProductError('Error al guardar producto. Verifica tu conexión e intenta nuevamente.');
     }
   };
 
