@@ -173,7 +173,16 @@ export default function AdminPanel() {
     setLoadingOrders(true);
     setOrderError('');
     try {
-      const url = `${API_ENDPOINTS.ORDERS}?limit=${ordersLimit}${orderSearch ? `&search=${encodeURIComponent(orderSearch)}` : ''}`;
+      // Construir la URL con los parámetros apropiados
+      const params = new URLSearchParams();
+      if (ordersLimit !== 'all') {
+        params.append('limit', ordersLimit.toString());
+      }
+      if (orderSearch) {
+        params.append('search', orderSearch);
+      }
+      const queryString = params.toString();
+      const url = `${API_ENDPOINTS.ORDERS}${queryString ? `?${queryString}` : ''}`;
       const response = await fetch(url);
       const data = await response.json();
       setOrders(Array.isArray(data) ? data : []);
@@ -1165,13 +1174,18 @@ export default function AdminPanel() {
                 </label>
                 <select
                   value={ordersLimit}
-                  onChange={(e) => setOrdersLimit(Number(e.target.value))}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setOrdersLimit(value === 'all' ? 'all' : Number(value));
+                  }}
                   className="border rounded-lg px-4 py-2 text-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value={200}>Últimos 200 pedidos</option>
                   <option value={500}>Últimos 500 pedidos</option>
                   <option value={1000}>Últimos 1000 pedidos</option>
                   <option value={5000}>Últimos 5000 pedidos</option>
+                  <option value={8000}>Últimos 8000 pedidos</option>
+                  <option value="all">Todos los pedidos</option>
                 </select>
               </div>
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 mb-4">
@@ -1242,10 +1256,10 @@ export default function AdminPanel() {
                 <div className="text-sm text-gray-600">
                   {orderSearch ? (
                     <span>
-                      Buscando: "{orderSearch}" en los últimos {ordersLimit} pedidos
+                      Buscando: "{orderSearch}" {ordersLimit === 'all' ? 'en todos los pedidos' : `en los últimos ${ordersLimit} pedidos`}
                     </span>
                   ) : (
-                    <span>Mostrando los últimos {ordersLimit} pedidos</span>
+                    <span>{ordersLimit === 'all' ? 'Mostrando todos los pedidos' : `Mostrando los últimos ${ordersLimit} pedidos`}</span>
                   )}
                 </div>
               </div>
