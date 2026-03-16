@@ -22,9 +22,18 @@ export default function CategorySelector({ onCategorySelect }) {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-50 py-12 px-4">
       <div className="max-w-5xl w-full">
         {/* Aviso de demora */}
-        <div className="mb-6 text-center">
+        <div className="mb-4 text-center">
           <div className="inline-block bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg border-2 border-red-700">
             <p className="text-lg md:text-xl font-bold">Demora aprox 10 dias</p>
+          </div>
+        </div>
+        
+        {/* Aviso de reservas suspendidas */}
+        <div className="mb-6 text-center">
+          <div className="inline-block bg-amber-500 text-white px-6 py-3 rounded-lg shadow-lg border-2 border-amber-600">
+            <p className="text-base md:text-lg font-bold leading-tight">IMPORTANTE</p>
+            <p className="text-base md:text-lg font-bold leading-tight">RESERVAS SUSPENDIDAS</p>
+            <p className="text-base md:text-lg font-bold leading-tight">SE PUEDE RESERVAR A PARTIR DEL JUEVES 19</p>
           </div>
         </div>
         
