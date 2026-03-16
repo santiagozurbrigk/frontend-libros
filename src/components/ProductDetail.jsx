@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { getImageUrl, API_ENDPOINTS, API_BASE_URL } from '../config/api';
+import { getImageUrl, API_ENDPOINTS, API_BASE_URL, RESERVATIONS_ENABLED } from '../config/api';
 
 export default function ProductDetail() {
   const { id } = useParams();
@@ -130,15 +130,23 @@ export default function ProductDetail() {
 
               <button
                 onClick={() => {
-                  addToCart(product);
-                  navigate('/carrito');
+                  if (RESERVATIONS_ENABLED) {
+                    addToCart(product);
+                    navigate('/carrito');
+                  } else {
+                    alert('Las reservas están suspendidas temporalmente. Se puede reservar a partir del jueves 19.');
+                  }
                 }}
-                className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 text-lg font-semibold transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+                className={`w-full py-4 rounded-xl text-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                  RESERVATIONS_ENABLED
+                    ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5'
+                    : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+                }`}
               >
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
-                Agregar al carrito
+                {RESERVATIONS_ENABLED ? 'Agregar al carrito' : 'Reservas suspendidas'}
               </button>
             </div>
           </div>

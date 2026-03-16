@@ -1,6 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
-import { getImageUrl } from '../config/api';
+import { getImageUrl, RESERVATIONS_ENABLED } from '../config/api';
 
 export default function Cart() {
   const { cart, removeFromCart, updateQuantity, clearCart, getTotal } = useCart();
@@ -114,14 +114,24 @@ export default function Cart() {
           </div>
         </div>
 
+        {!RESERVATIONS_ENABLED && (
+          <div className="mb-4 p-4 bg-amber-100 border-2 border-amber-400 rounded-xl text-amber-800 font-semibold text-center">
+            Las reservas están suspendidas temporalmente. Se puede reservar a partir del jueves 19.
+          </div>
+        )}
         <button
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 text-lg font-semibold transition-all duration-200 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 flex items-center justify-center gap-2"
+          className={`w-full px-6 py-4 rounded-xl text-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+            RESERVATIONS_ENABLED
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5'
+              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+          }`}
           onClick={handleCheckout}
+          disabled={!RESERVATIONS_ENABLED}
         >
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-          Continuar con la reserva
+          {RESERVATIONS_ENABLED ? 'Continuar con la reserva' : 'Reservas suspendidas'}
         </button>
       </div>
     </div>

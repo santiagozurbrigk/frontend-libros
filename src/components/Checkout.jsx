@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useCart } from '../contexts/CartContext';
 import { useAuth } from '../contexts/AuthContext';
-import { getImageUrl, API_ENDPOINTS } from '../config/api';
+import { getImageUrl, API_ENDPOINTS, RESERVATIONS_ENABLED } from '../config/api';
 
 export default function Checkout() {
   const { cart, getTotal, clearCart } = useCart();
@@ -13,6 +13,10 @@ export default function Checkout() {
   const navigate = useNavigate();
 
   const handleSubmit = async () => {
+    if (!RESERVATIONS_ENABLED) {
+      setError('Las reservas están suspendidas temporalmente. Se puede reservar a partir del jueves 19.');
+      return;
+    }
     if (cart.length === 0) {
       setError('El carrito está vacío.');
       return;
@@ -98,6 +102,12 @@ export default function Checkout() {
   return (
     <div className="max-w-3xl mx-auto py-10 px-4 min-h-screen">
       <h1 className="text-4xl font-bold mb-8 text-slate-800">Finalizar Reserva</h1>
+
+      {!RESERVATIONS_ENABLED && (
+        <div className="mb-6 p-6 bg-amber-100 border-2 border-amber-400 rounded-2xl text-amber-800 font-semibold text-center text-lg">
+          Las reservas están suspendidas temporalmente. Se puede reservar a partir del jueves 19.
+        </div>
+      )}
 
       <div className="space-y-6">
         <div className="bg-white rounded-2xl shadow-lg p-6 border-2 border-slate-200">
@@ -186,9 +196,13 @@ export default function Checkout() {
         )}
 
         <button
-          className="w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-xl hover:from-blue-700 hover:to-indigo-700 text-lg font-semibold disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5 transition-all duration-200 flex items-center justify-center gap-2"
+          className={`w-full px-6 py-4 rounded-xl text-lg font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+            RESERVATIONS_ENABLED && cart.length > 0 && !loading
+              ? 'bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700 shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 hover:-translate-y-0.5'
+              : 'bg-gray-400 text-gray-200 cursor-not-allowed'
+          }`}
           onClick={handleSubmit}
-          disabled={cart.length === 0 || loading}
+          disabled={cart.length === 0 || loading || !RESERVATIONS_ENABLED}
         >
           {loading ? (
             <>
@@ -203,7 +217,7 @@ export default function Checkout() {
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              Confirmar reserva
+              {RESERVATIONS_ENABLED ? 'Confirmar reserva' : 'Reservas suspendidas'}
             </>
           )}
         </button>
