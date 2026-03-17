@@ -32,7 +32,7 @@ export default function CategorySelector({ onCategorySelect }) {
         <div className="mb-6 text-center">
           <div className="inline-block bg-amber-500 text-white px-6 py-3 rounded-lg shadow-lg border-2 border-amber-600">
             <p className="text-base md:text-lg font-bold leading-tight">IMPORTANTE</p>
-            <p className="text-base md:text-lg font-bold leading-tight">RESERVAS SUSPENDIDAS</p>
+            <p className="text-base md:text-lg font-bold leading-tight">NUEVAS RESERVAS SUSPENDIDAS</p>
             <p className="text-base md:text-lg font-bold leading-tight">SE PUEDE RESERVAR A PARTIR DEL JUEVES 19</p>
           </div>
         </div>
