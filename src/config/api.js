@@ -2,8 +2,8 @@
 // En Vite, las variables de entorno deben empezar con VITE_
 const API_BASE_URL = import.meta.env.VITE_BACKEND_URL || 'https://backend-libros-ox7x.onrender.com';
 
-// Reservas: cambiar a true para habilitar cuando corresponda
-export const RESERVATIONS_ENABLED = false;
+// Reservas: cambiar a false para deshabilitar temporalmente
+export const RESERVATIONS_ENABLED = true;
 
 export const getImageUrl = (image) => {
   // Si la imagen está vacía o es null/undefined, retornar vacío
